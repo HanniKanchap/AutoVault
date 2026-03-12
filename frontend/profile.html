@@ -56,19 +56,61 @@
     @keyframes spinRing { to{transform:rotate(360deg)} }
     @keyframes toastIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
     @keyframes toastOut { to{opacity:0;transform:translateX(20px)} }
-    .avatar-ring { width:110px; height:110px; border-radius:50%; border:1px solid rgba(200,144,58,.3);
-      margin:0 auto 20px; position:relative; cursor:pointer; transition:border-color .3s; }
+
+    /* ── AVATAR ── */
+    .avatar-ring {
+      width:110px; height:110px; border-radius:50%;
+      border:2px solid rgba(200,144,58,.3);
+      margin:0 auto 20px; position:relative; cursor:pointer;
+      transition:border-color .3s;
+      overflow:hidden; /* clips the image nicely */
+    }
     .avatar-ring:hover { border-color:var(--gold); }
     .avatar-ring:hover .avatar-overlay { opacity:1; }
-    .avatar-img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
-    .avatar-initials { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center;
+
+    /* Initials fallback */
+    .avatar-initials {
+      width:100%; height:100%;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
       background:linear-gradient(135deg,rgba(200,144,58,.15),rgba(200,144,58,.04));
-      font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:600; color:var(--gold); }
-    .avatar-overlay { position:absolute; inset:0; border-radius:50%; background:rgba(10,12,14,.75);
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; opacity:0; transition:opacity .25s; }
+      font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:600; color:var(--gold);
+    }
+
+    /* Actual photo — sits on top of initials */
+    .avatar-photo {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover; border-radius:50%;
+      display:block;
+    }
+
+    /* Upload spinner overlay */
+    .avatar-uploading {
+      position:absolute; inset:0; border-radius:50%;
+      background:rgba(10,12,14,.75);
+      display:none; align-items:center; justify-content:center;
+    }
+    .avatar-uploading.active { display:flex; }
+    .avatar-upload-spin {
+      width:22px; height:22px;
+      border:2px solid rgba(200,144,58,.2);
+      border-top-color:var(--gold);
+      border-radius:50%;
+      animation:spinRing .7s linear infinite;
+    }
+
+    /* Hover overlay (camera icon) */
+    .avatar-overlay {
+      position:absolute; inset:0; border-radius:50%;
+      background:rgba(10,12,14,.7);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      opacity:0; transition:opacity .25s; z-index:2;
+    }
     .avatar-overlay svg { stroke:var(--gold); }
     .avatar-overlay span { font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+
     .avatar-input { display:none; }
+
     .profile-name    { font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:600; color:var(--text); margin-bottom:4px; text-align:center; }
     .profile-email-d { font-size:.7rem; color:var(--muted); margin-bottom:18px; word-break:break-all; text-align:center; }
     .profile-badge   { display:inline-flex; align-items:center; gap:6px; padding:5px 14px;
@@ -113,7 +155,6 @@
       font-family:'Barlow',sans-serif; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase;
       cursor:pointer; transition:background .25s,border-color .25s; }
     .btn-danger-full:hover { background:rgba(255,80,80,.07); border-color:rgba(255,80,80,.4); }
-    .btn-danger-full svg,.btn-secondary svg,.btn-logout svg { stroke:currentColor; }
     .spin-ring { width:16px; height:16px; border:2px solid rgba(10,12,14,.2); border-top-color:var(--dark); border-radius:50%; animation:spinRing .7s linear infinite; display:inline-block; }
     .banner { display:none; padding:10px 14px; font-size:.7rem; line-height:1.55; margin-bottom:16px; }
     .banner.error   { background:rgba(255,68,68,.08);  border-left:2px solid rgba(255,90,90,.7);  color:#ffbbbb; }
@@ -199,21 +240,41 @@
   <main class="main-content">
     <div class="page-header">
       <div class="page-header-eyebrow">Member Portal</div>
-      <h1 class="page-header-title">My <strong>Garage</strong></h1>
+      <h1 class="page-header-title">My <strong>Profile</strong></h1>
     </div>
     <div class="profile-grid">
       <div>
         <div class="panel" style="animation-delay:.05s;">
           <span class="panel-corner tl"></span><span class="panel-corner br"></span>
           <div class="panel-inner" style="text-align:center;">
-            <div class="avatar-ring" id="avatarRing">
+
+            <!-- AVATAR -->
+            <div class="avatar-ring" id="avatarRing" title="Click to change photo">
+              <!-- Initials shown when no photo -->
               <div class="avatar-initials" id="avatarInitials">—</div>
+              <!-- Real photo — injected by JS when available -->
+              <!-- Upload spinner -->
+              <div class="avatar-uploading" id="avatarUploading">
+                <div class="avatar-upload-spin"></div>
+              </div>
+              <!-- Hover camera overlay -->
               <div class="avatar-overlay">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 <span>Change</span>
               </div>
             </div>
             <input type="file" id="avatarInput" class="avatar-input" accept="image/*"/>
+
+            <!-- Remove photo link — only shown when a photo exists -->
+            <div id="avatarRemoveWrap" style="display:none; margin-top:-10px; margin-bottom:14px;">
+              <button id="btnRemoveAvatar" type="button" style="background:none; border:none; cursor:pointer; font-family:'Barlow',sans-serif; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,100,100,.5); transition:color .2s; padding:4px 0;">
+                <span style="display:inline-flex; align-items:center; gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  Remove Photo
+                </span>
+              </button>
+            </div>
+
             <div class="profile-name"    id="dispName">—</div>
             <div class="profile-email-d" id="dispEmail">—</div>
             <div style="display:flex;justify-content:center;">
@@ -298,72 +359,113 @@
 <script>
 (function(){
   'use strict';
-  var sb=null, authUser=null, profile=null;
+  var sb = null, authUser = null, profile = null;
 
+  /* ─── INIT ─────────────────────────────────────────────────────── */
   function tryInitSupabase(){
-    var url=(typeof SUPABASE_URL!=='undefined')?SUPABASE_URL:null;
-    var anon=(typeof SUPABASE_ANON!=='undefined')?SUPABASE_ANON:null;
-    if(!url||!anon)return;
-    try{ sb=window.supabase.createClient(url,anon,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}); }
-    catch(e){ console.error('Supabase:',e); }
+    var url  = (typeof SUPABASE_URL  !== 'undefined') ? SUPABASE_URL  : null;
+    var anon = (typeof SUPABASE_ANON !== 'undefined') ? SUPABASE_ANON : null;
+    if (!url || !anon) return;
+    try {
+      sb = window.supabase.createClient(url, anon, {
+        auth: { autoRefreshToken:true, persistSession:true, detectSessionInUrl:true }
+      });
+    } catch(e) { console.error('Supabase:', e); }
   }
 
   function $(id){ return document.getElementById(id); }
 
-  function toast(msg,type){
-    var wrap=$('toastWrap'), el=document.createElement('div');
-    el.className='toast '+(type||'success'); el.textContent=msg; wrap.appendChild(el);
-    setTimeout(function(){ el.style.animation='toastOut .3s ease forwards'; setTimeout(function(){ el.remove(); },300); },3000);
+  /* ─── TOAST ─────────────────────────────────────────────────────── */
+  function toast(msg, type){
+    var wrap = $('toastWrap');
+    var el   = document.createElement('div');
+    el.className = 'toast ' + (type || 'success');
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(function(){
+      el.style.animation = 'toastOut .3s ease forwards';
+      setTimeout(function(){ el.remove(); }, 300);
+    }, 3000);
   }
 
-  function showBanner(msg,type){ var el=$('profileBanner'); el.textContent=msg; el.className='banner '+(type||'error')+' visible'; }
+  function showBanner(msg, type){ var el=$('profileBanner'); el.textContent=msg; el.className='banner '+(type||'error')+' visible'; }
   function hideBanner(){ var el=$('profileBanner'); el.className='banner'; el.textContent=''; }
 
-  /* ── FETCH PROFILE (source of truth: public.profiles) ── */
+  /* ─── FETCH PROFILE ─────────────────────────────────────────────── */
   async function fetchProfile(uid){
-    if(!sb||!uid)return null;
-    try{
-      var r=await sb.from('profiles').select('id,first_name,last_name,full_name,email,avatar_url,created_at').eq('id',uid).single();
-      if(r.error&&r.error.code!=='PGRST116')console.warn('fetchProfile:',r.error.message);
-      return r.data||null;
-    }catch(e){return null;}
+    if (!sb || !uid) return null;
+    try {
+      var r = await sb.from('profiles')
+        .select('id,first_name,last_name,full_name,email,avatar_url,created_at')
+        .eq('id', uid).single();
+      if (r.error && r.error.code !== 'PGRST116') console.warn('fetchProfile:', r.error.message);
+      return r.data || null;
+    } catch(e) { return null; }
   }
 
   async function fetchSavedCars(uid){
-    if(!sb||!uid)return[];
-    try{
-      var r=await sb.from('saved_cars').select('*').eq('user_id',uid).order('created_at',{ascending:false});
-      if(r.error){console.warn('saved_cars:',r.error.message);return[];}
-      return r.data||[];
-    }catch(e){return[];}
+    if (!sb || !uid) return [];
+    try {
+      var r = await sb.from('saved_cars').select('*').eq('user_id', uid).order('created_at',{ascending:false});
+      if (r.error){ console.warn('saved_cars:', r.error.message); return []; }
+      return r.data || [];
+    } catch(e) { return []; }
   }
 
-  function renderAvatar(first,last,url){
-    var ring=$('avatarRing'), old=ring.querySelector('.avatar-img');
-    if(old)old.remove();
-    var ini=$('avatarInitials');
-    if(url){
-      ini.style.display='none';
-      var img=document.createElement('img');
-      img.className='avatar-img'; img.src=url; img.alt='Avatar';
-      img.onerror=function(){ ini.style.display='flex'; img.remove(); };
-      ring.insertBefore(img,ring.querySelector('.avatar-overlay'));
+  /* ─── AVATAR RENDER ─────────────────────────────────────────────
+     Strategy: always keep .avatar-initials in DOM for fallback.
+     A real photo is rendered as .avatar-photo positioned absolutely
+     on top. If the image fails to load we simply remove it and the
+     initials show through.
+  ──────────────────────────────────────────────────────────────── */
+  function renderAvatar(first, last, url){
+    var ring = $('avatarRing');
+    var ini  = $('avatarInitials');
+
+    // Update initials text (shown when no photo)
+    ini.textContent = ((first||'').charAt(0) + (last||'').charAt(0)).toUpperCase() || '?';
+
+    // Remove any existing photo element
+    var old = ring.querySelector('.avatar-photo');
+    if (old) old.remove();
+
+    if (url) {
+      var img = document.createElement('img');
+      img.className = 'avatar-photo';
+      // Cache-bust so the browser doesn't show a stale image
+      img.src = url + (url.includes('?') ? '&_cb=' : '?_cb=') + Date.now();
+      img.alt = 'Avatar';
+
+      img.onload = function(){
+        // Photo loaded — hide initials
+        ini.style.visibility = 'hidden';
+      };
+      img.onerror = function(){
+        // Photo failed — show initials, remove broken img
+        ini.style.visibility = 'visible';
+        img.remove();
+        updateRemoveBtn(false);
+      };
+
+      // Insert before the uploading spinner (keeps z-order correct)
+      ring.insertBefore(img, $('avatarUploading'));
+      updateRemoveBtn(true);
     } else {
-      ini.style.display='flex';
-      ini.textContent=((first||'').charAt(0)+(last||'').charAt(0)).toUpperCase()||'?';
+      // No URL — make sure initials are visible
+      ini.style.visibility = 'visible';
+      updateRemoveBtn(false);
     }
   }
 
+  /* ─── POPULATE UI ───────────────────────────────────────────────── */
   function populateUI(){
-    if(!authUser)return;
-    /* Always read from public.profiles first — that's the source of truth.
-       auth.user_metadata is a fallback only. */
-    var meta=authUser.user_metadata||{};
-    var first=(profile&&profile.first_name)?profile.first_name:(meta.first_name||'');
-    var last =(profile&&profile.last_name) ?profile.last_name :(meta.last_name ||'');
-    var email=(profile&&profile.email)     ?profile.email     :authUser.email;
-    var url  =(profile&&profile.avatar_url)?profile.avatar_url:(meta.avatar_url||null);
-    var full =(first+' '+last).trim()||email.split('@')[0];
+    if (!authUser) return;
+    var meta  = authUser.user_metadata || {};
+    var first = (profile && profile.first_name) ? profile.first_name : (meta.first_name || '');
+    var last  = (profile && profile.last_name)  ? profile.last_name  : (meta.last_name  || '');
+    var email = (profile && profile.email)      ? profile.email      : authUser.email;
+    var url   = (profile && profile.avatar_url) ? profile.avatar_url : (meta.avatar_url || null);
+    var full  = (first + ' ' + last).trim() || email.split('@')[0];
 
     $('dispName').textContent  = full;
     $('dispEmail').textContent = email;
@@ -371,134 +473,293 @@
     $('inp-last').value  = last;
     $('inp-email').value = email;
 
-    renderAvatar(first,last,url);
+    renderAvatar(first, last, url);
 
-    var created=(profile&&profile.created_at)?profile.created_at:authUser.created_at;
-    if(created){
-      var days=Math.floor((Date.now()-new Date(created))/86400000);
-      $('statDays').textContent=days<1?'<1':days;
+    var created = (profile && profile.created_at) ? profile.created_at : authUser.created_at;
+    if (created){
+      var days = Math.floor((Date.now() - new Date(created)) / 86400000);
+      $('statDays').textContent = days < 1 ? '<1' : days;
     }
+
     $('authGuard').classList.remove('visible');
-    $('pageWrap').style.cssText='display:flex;flex-direction:column;';
+    $('pageWrap').style.cssText = 'display:flex;flex-direction:column;';
   }
 
+  /* ─── AVATAR UPLOAD ─────────────────────────────────────────────
+     Key fixes vs. original:
+     1. Save the CLEAN url (no ?t= cache-buster) to the DB
+     2. Show a spinner on the avatar ring during upload
+     3. Call renderAvatar with the new url immediately — no refetch needed
+     4. Also update auth metadata so other pages see it
+  ──────────────────────────────────────────────────────────────── */
+  async function handleAvatarChange(file){
+    if (!file) return;
+
+    // Validate
+    if (!file.type.startsWith('image/')){
+      toast('Please select an image file.', 'error'); return;
+    }
+    if (file.size > 2 * 1024 * 1024){
+      toast('Image must be under 2 MB.', 'error'); return;
+    }
+
+    // Show spinner on avatar
+    $('avatarUploading').classList.add('active');
+
+    try {
+      // Build a stable path: userId/avatar.ext
+      var ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      var path = authUser.id + '/avatar.' + ext;
+
+      // Upload to Supabase Storage (bucket: "avatars")
+      // upsert:true replaces the existing file at the same path
+      var upRes = await sb.storage.from('avatars').upload(path, file, {
+        upsert: true,
+        contentType: file.type
+      });
+
+      if (upRes.error){
+        console.error('Storage upload error:', upRes.error);
+        toast('Upload failed: ' + upRes.error.message, 'error');
+        return;
+      }
+
+      // Get the public URL (clean — no cache-buster, that's only for display)
+      var pubRes = sb.storage.from('avatars').getPublicUrl(path);
+      var cleanUrl = pubRes.data && pubRes.data.publicUrl;
+
+      if (!cleanUrl){
+        toast('Could not get image URL. Is the "avatars" bucket set to public?', 'error');
+        return;
+      }
+
+      // 1) Save clean URL to profiles table
+      var dbRes = await sb.from('profiles').update({
+        avatar_url:  cleanUrl,
+        updated_at:  new Date().toISOString()
+      }).eq('id', authUser.id);
+
+      if (dbRes.error){
+        console.error('DB update error:', dbRes.error);
+        toast('Saved to storage but DB update failed: ' + dbRes.error.message, 'error');
+        return;
+      }
+
+      // 2) Also mirror to auth metadata (for nav avatar on other pages)
+      await sb.auth.updateUser({ data: { avatar_url: cleanUrl } }).catch(function(){});
+
+      // 3) Update local profile object so populateUI stays in sync
+      if (profile) profile.avatar_url = cleanUrl;
+
+      // 4) Render the new photo immediately — no round-trip refetch needed
+      var first = $('inp-first').value;
+      var last  = $('inp-last').value;
+      renderAvatar(first, last, cleanUrl);
+
+      toast('Photo updated!', 'success');
+
+    } catch(e){
+      console.error('uploadAvatar exception:', e);
+      toast('Network error during upload.', 'error');
+    } finally {
+      // Always hide spinner
+      $('avatarUploading').classList.remove('active');
+      // Reset file input so the same file can be re-selected if needed
+      $('avatarInput').value = '';
+    }
+  }
+
+  /* ─── SHOW / HIDE REMOVE BUTTON ────────────────────────────────── */
+  function updateRemoveBtn(hasPhoto){
+    $('avatarRemoveWrap').style.display = hasPhoto ? 'block' : 'none';
+  }
+
+  /* ─── REMOVE AVATAR ─────────────────────────────────────────────── */
+  async function handleRemoveAvatar(){
+    if (!sb || !authUser) return;
+
+    $('avatarUploading').classList.add('active');
+
+    try {
+      // 1) Delete file from storage (best-effort — don't block on error)
+      var ext = ['jpg','jpeg','png','webp','gif'];
+      for (var i = 0; i < ext.length; i++){
+        await sb.storage.from('avatars').remove([authUser.id + '/avatar.' + ext[i]]).catch(function(){});
+      }
+
+      // 2) Clear avatar_url in profiles table
+      var dbRes = await sb.from('profiles').update({
+        avatar_url:  null,
+        updated_at:  new Date().toISOString()
+      }).eq('id', authUser.id);
+
+      if (dbRes.error){
+        toast('Could not remove photo: ' + dbRes.error.message, 'error');
+        return;
+      }
+
+      // 3) Clear from auth metadata too
+      await sb.auth.updateUser({ data: { avatar_url: null } }).catch(function(){});
+
+      // 4) Update local state and re-render
+      if (profile) profile.avatar_url = null;
+      var first = $('inp-first').value;
+      var last  = $('inp-last').value;
+      renderAvatar(first, last, null);
+      updateRemoveBtn(false);
+
+      toast('Photo removed.', 'success');
+
+    } catch(e){
+      console.error('removeAvatar exception:', e);
+      toast('Network error.', 'error');
+    } finally {
+      $('avatarUploading').classList.remove('active');
+    }
+  }
+
+  /* ─── SAVE PROFILE ──────────────────────────────────────────────── */
+  async function handleSave(){
+    hideBanner();
+    var first = $('inp-first').value.trim();
+    var last  = $('inp-last').value.trim();
+    if (!first) return showBanner('Please enter your first name.');
+    if (!last)  return showBanner('Please enter your last name.');
+    if (!sb)    return showBanner('Supabase not configured.');
+
+    var btn = $('btnSave'), lbl = $('btnSaveLabel');
+    btn.disabled = true;
+    lbl.innerHTML = '<span class="spin-ring"></span>';
+
+    try {
+      var full = (first + ' ' + last).trim();
+      var r = await sb.from('profiles').update({
+        first_name:  first,
+        last_name:   last,
+        full_name:   full,
+        updated_at:  new Date().toISOString()
+      }).eq('id', authUser.id);
+
+      if (r.error){
+        showBanner('Save failed: ' + r.error.message, 'error');
+      } else {
+        // Mirror to auth metadata too
+        await sb.auth.updateUser({ data: { first_name:first, last_name:last, full_name:full } }).catch(function(){});
+        // Refresh local profile
+        profile = await fetchProfile(authUser.id);
+        populateUI();
+        toast('Profile updated!', 'success');
+      }
+    } catch(e){
+      showBanner('Network error.', 'error');
+    } finally {
+      btn.disabled = false;
+      lbl.textContent = 'Save Changes';
+    }
+  }
+
+  /* ─── SAVED CARS ────────────────────────────────────────────────── */
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   function renderSavedCars(cars){
-    $('statSaved').textContent=cars.length;
-    var c=$('savedContainer');
-    if(!cars.length){
-      c.innerHTML='<div class="saved-empty"><div class="saved-empty-icon">🚗</div><div class="saved-empty-title">No saved cars yet</div><div class="saved-empty-sub">Browse our collection and save cars you love</div></div>';
+    $('statSaved').textContent = cars.length;
+    var c = $('savedContainer');
+    if (!cars.length){
+      c.innerHTML = '<div class="saved-empty"><div class="saved-empty-icon">🚗</div><div class="saved-empty-title">No saved cars yet</div><div class="saved-empty-sub">Browse our collection and save cars you love</div></div>';
       return;
     }
-    var h='<div class="saved-grid">';
+    var h = '<div class="saved-grid">';
     cars.forEach(function(car){
-      h+='<div class="car-card">'
-        +'<div class="car-make">'+esc(car.make||'')+'</div>'
-        +'<div class="car-model">'+esc(car.model||'Unknown')+'</div>'
-        +'<div class="car-year">'+esc(String(car.year||''))+'</div>'
-        +(car.price?'<div class="car-price">'+esc(car.price)+'</div>':'')
-        +'<button class="car-remove" data-id="'+car.id+'" type="button">'
-        +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Remove</button>'
-        +'</div>';
+      h += '<div class="car-card">'
+        + '<div class="car-make">'  + esc(car.make  || '')            + '</div>'
+        + '<div class="car-model">' + esc(car.model || 'Unknown')     + '</div>'
+        + '<div class="car-year">'  + esc(String(car.year || ''))     + '</div>'
+        + (car.price ? '<div class="car-price">' + esc(car.price) + '</div>' : '')
+        + '<button class="car-remove" data-id="' + car.id + '" type="button">'
+        + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Remove</button>'
+        + '</div>';
     });
-    h+='</div>';
-    c.innerHTML=h;
+    h += '</div>';
+    c.innerHTML = h;
     c.querySelectorAll('.car-remove').forEach(function(btn){
-      btn.addEventListener('click',function(){ removeCar(btn.dataset.id); });
+      btn.addEventListener('click', function(){ removeCar(btn.dataset.id); });
     });
   }
 
   async function removeCar(id){
-    if(!sb||!id)return;
-    var r=await sb.from('saved_cars').delete().eq('id',id).eq('user_id',authUser.id);
-    if(r.error){toast('Could not remove. Try again.','error');return;}
-    toast('Removed from garage.','success');
+    if (!sb || !id) return;
+    var r = await sb.from('saved_cars').delete().eq('id', id).eq('user_id', authUser.id);
+    if (r.error){ toast('Could not remove. Try again.', 'error'); return; }
+    toast('Removed from garage.', 'success');
     renderSavedCars(await fetchSavedCars(authUser.id));
   }
 
-  async function uploadAvatar(file){
-    if(!file||!file.type.startsWith('image/')){toast('Please select an image.','error');return null;}
-    if(file.size>2*1024*1024){toast('Max 2 MB.','error');return null;}
-    toast('Uploading…','info');
-    try{
-      var ext=(file.name.split('.').pop())||'jpg';
-      var path=authUser.id+'/avatar.'+ext;
-      var up=await sb.storage.from('avatars').upload(path,file,{upsert:true});
-      if(up.error){toast('Upload failed: '+up.error.message,'error');return null;}
-      var pub=sb.storage.from('avatars').getPublicUrl(path);
-      var url=(pub.data&&pub.data.publicUrl)?pub.data.publicUrl+'?t='+Date.now():null;
-      if(!url){toast('Could not get URL.','error');return null;}
-      await sb.from('profiles').update({avatar_url:url,updated_at:new Date().toISOString()}).eq('id',authUser.id);
-      return url;
-    }catch(e){toast('Network error.','error');return null;}
-  }
-
-  /* ── SAVE PROFILE → writes to public.profiles ── */
-  async function handleSave(){
-    hideBanner();
-    var first=$('inp-first').value.trim(), last=$('inp-last').value.trim();
-    if(!first)return showBanner('Please enter your first name.');
-    if(!last) return showBanner('Please enter your last name.');
-    if(!sb)   return showBanner('Supabase not configured.');
-    var btn=$('btnSave'), lbl=$('btnSaveLabel');
-    btn.disabled=true; lbl.innerHTML='<span class="spin-ring"></span>';
-    try{
-      var full=(first+' '+last).trim();
-      var r=await sb.from('profiles').update({
-        first_name:first, last_name:last, full_name:full,
-        updated_at:new Date().toISOString()
-      }).eq('id',authUser.id);
-      if(r.error){ showBanner('Save failed: '+r.error.message,'error'); }
-      else {
-        await sb.auth.updateUser({data:{first_name:first,last_name:last,full_name:full}}).catch(function(){});
-        profile=await fetchProfile(authUser.id);
-        populateUI();
-        toast('Profile updated!','success');
-      }
-    }catch(e){ showBanner('Network error.','error'); }
-    finally{ btn.disabled=false; lbl.textContent='Save Changes'; }
-  }
-
+  /* ─── LOGOUT ────────────────────────────────────────────────────── */
   function showLogoutModal(){ $('logoutModal').classList.add('visible'); }
   function hideLogoutModal(){ $('logoutModal').classList.remove('visible'); }
   async function doLogout(){
     hideLogoutModal();
-    if(sb)await sb.auth.signOut().catch(function(){});
-    window.location.href='login.html';
+    if (sb) await sb.auth.signOut().catch(function(){});
+    window.location.href = 'login.html';
   }
 
+  /* ─── BOOT ──────────────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', async function(){
     tryInitSupabase();
-    if(!sb){
-      $('authGuard').classList.remove('visible');
-      $('pageWrap').style.cssText='display:flex;flex-direction:column;';
-      $('dispName').textContent='Guest'; $('dispEmail').textContent='No config.js';
-      $('avatarInitials').textContent='G';
-      toast('Add config.js with SUPABASE_URL and SUPABASE_ANON.','error'); return;
-    }
-    var s=await sb.auth.getSession().catch(function(){return null;});
-    if(!s||!s.data||!s.data.session){ window.location.href='login.html'; return; }
-    authUser=s.data.session.user;
 
-    var results=await Promise.all([fetchProfile(authUser.id),fetchSavedCars(authUser.id)]);
-    profile=results[0];
+    if (!sb){
+      $('authGuard').classList.remove('visible');
+      $('pageWrap').style.cssText = 'display:flex;flex-direction:column;';
+      $('dispName').textContent = 'Guest';
+      $('dispEmail').textContent = 'No config.js';
+      $('avatarInitials').textContent = 'G';
+      toast('Add config.js with SUPABASE_URL and SUPABASE_ANON.', 'error');
+      return;
+    }
+
+    // Auth guard — redirect to login if not signed in
+    var s = await sb.auth.getSession().catch(function(){ return null; });
+    if (!s || !s.data || !s.data.session){
+      window.location.href = 'login.html'; return;
+    }
+    authUser = s.data.session.user;
+
+    // Load profile + saved cars in parallel
+    var results = await Promise.all([
+      fetchProfile(authUser.id),
+      fetchSavedCars(authUser.id)
+    ]);
+    profile = results[0];
     populateUI();
     renderSavedCars(results[1]);
 
-    $('avatarRing').addEventListener('click',function(){ $('avatarInput').click(); });
-    $('avatarInput').addEventListener('change',async function(){
-      var file=this.files&&this.files[0]; if(!file)return;
-      var url=await uploadAvatar(file);
-      if(url){ profile=await fetchProfile(authUser.id); renderAvatar($('inp-first').value,$('inp-last').value,url); toast('Photo updated!','success'); }
-      this.value='';
+    // Avatar click → open file picker
+    $('avatarRing').addEventListener('click', function(){ $('avatarInput').click(); });
+
+    // File chosen → upload
+    $('avatarInput').addEventListener('change', function(){
+      var file = this.files && this.files[0];
+      if (file) handleAvatarChange(file);
     });
-    $('btnSave').addEventListener('click',handleSave);
-    [$('btnLogoutNav'),$('btnLogoutCard')].forEach(function(b){b.addEventListener('click',showLogoutModal);});
-    $('cancelLogout').addEventListener('click',hideLogoutModal);
-    $('confirmLogout').addEventListener('click',doLogout);
-    $('logoutModal').addEventListener('click',function(e){if(e.target===this)hideLogoutModal();});
-    sb.auth.onAuthStateChange(function(evt){if(evt==='SIGNED_OUT')window.location.href='login.html';});
+
+    // Remove photo
+    $('btnRemoveAvatar').addEventListener('click', function(e){
+      e.stopPropagation(); // don't trigger avatarRing click
+      handleRemoveAvatar();
+    });
+
+    $('btnSave').addEventListener('click', handleSave);
+
+    [$('btnLogoutNav'), $('btnLogoutCard')].forEach(function(b){
+      b.addEventListener('click', showLogoutModal);
+    });
+    $('cancelLogout').addEventListener('click', hideLogoutModal);
+    $('confirmLogout').addEventListener('click', doLogout);
+    $('logoutModal').addEventListener('click', function(e){ if (e.target === this) hideLogoutModal(); });
+
+    sb.auth.onAuthStateChange(function(evt){
+      if (evt === 'SIGNED_OUT') window.location.href = 'login.html';
+    });
   });
 })();
 </script>

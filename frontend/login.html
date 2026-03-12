@@ -27,7 +27,6 @@
     .page-wrap { position:relative; z-index:1; min-height:100vh; display:grid;
       grid-template-columns: 1fr 520px 1fr; grid-template-rows: auto 1fr auto; padding: 0 24px; }
 
-    /* NAV */
     .page-nav { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:28px 36px; }
     .logo { font-family:'Cormorant Garamond',serif; font-size:1.7rem; font-weight:600; letter-spacing:.02em; text-decoration:none; color:var(--text); }
     .logo span:first-child { color:var(--gold); }
@@ -35,7 +34,6 @@
     .back-link:hover { color:var(--gold); gap:12px; }
     .back-link svg { stroke:currentColor; }
 
-    /* CARD */
     .page-center { grid-column:2; display:flex; flex-direction:column; justify-content:center; padding:20px 0 60px; }
     .card { position:relative; background:rgba(255,255,255,.025); border:1px solid rgba(200,144,58,.16); backdrop-filter:blur(24px); overflow:hidden; }
     .card-corner { position:absolute; width:22px; height:22px; pointer-events:none; z-index:2; }
@@ -49,7 +47,6 @@
     .card-logo span:first-child { color:var(--gold); }
     .card-tagline { font-size:.58rem; letter-spacing:.32em; text-transform:uppercase; color:rgba(200,144,58,.5); }
 
-    /* TABS */
     .tabs { display:flex; border-bottom:1px solid rgba(255,255,255,.07); margin-bottom:28px; }
     .tab-btn { flex:1; padding:12px; text-align:center; font-family:'Barlow',sans-serif; font-size:.63rem; letter-spacing:.2em; text-transform:uppercase;
       color:var(--muted); cursor:pointer; background:none; border:none; outline:none; position:relative; transition:color .3s; }
@@ -57,7 +54,6 @@
     .tab-btn.active { color:var(--gold); }
     .tab-btn.active .tab-line { transform:scaleX(1); }
 
-    /* PANELS */
     .panel { display:none; }
     .panel.active { display:block; animation:fadeUp .3s ease both; }
 
@@ -74,7 +70,6 @@
     .panel.active .field:nth-child(4) { animation:fieldIn .3s .19s ease both; }
     .panel.active .field:nth-child(5) { animation:fieldIn .3s .24s ease both; }
 
-    /* FIELDS */
     .field { margin-bottom:18px; }
     .field label { display:block; font-size:.57rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; transition:color .3s; }
     .field:focus-within label { color:var(--gold); }
@@ -94,21 +89,18 @@
     input.is-invalid { border-color:rgba(255,80,80,.45)  !important; animation:shake .35s ease; }
     input::placeholder { color:rgba(240,237,232,.16); }
 
-    /* PASSWORD STRENGTH */
     .pw-strength { margin-top:7px; display:none; }
     .pw-strength.visible { display:block; }
     .pw-bar { height:2px; background:rgba(255,255,255,.07); }
     .pw-fill { height:100%; width:0; transition:width .4s,background .4s; }
     .pw-label { font-size:.55rem; letter-spacing:.12em; text-transform:uppercase; margin-top:4px; }
 
-    /* FORM ROW */
     .form-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; margin-top:4px; }
     .remember { display:flex; align-items:center; gap:8px; font-size:.63rem; color:var(--muted); cursor:pointer; }
     .remember input { accent-color:var(--gold); }
     .forgot { font-size:.63rem; color:var(--gold); text-decoration:none; border-bottom:1px solid transparent; transition:border-color .3s; }
     .forgot:hover { border-color:var(--gold); }
 
-    /* SUBMIT BUTTON */
     .btn-submit { width:100%; padding:15px; background:var(--gold); border:none; color:var(--dark);
       font-family:'Barlow Condensed',sans-serif; font-size:.8rem; letter-spacing:.26em;
       text-transform:uppercase; font-weight:700; cursor:pointer;
@@ -124,18 +116,6 @@
     .btn-submit.loading .btn-spinner { display:flex; }
     .spin-ring { width:18px; height:18px; border:2px solid rgba(10,12,14,.25); border-top-color:var(--dark); border-radius:50%; animation:spinRing .7s linear infinite; }
 
-    /* DIVIDER / OAUTH */
-    .divider { display:flex; align-items:center; gap:12px; margin:22px 0; }
-    .divider::before,.divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.07); }
-    .divider span { font-size:.55rem; color:rgba(240,237,232,.3); letter-spacing:.16em; text-transform:uppercase; }
-    .oauth-grid { display:flex; gap:10px; }
-    .btn-oauth { flex:1; padding:12px 10px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
-      color:var(--muted); font-family:'Barlow',sans-serif; font-size:.65rem; letter-spacing:.12em;
-      text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-      transition:border-color .3s,color .3s,background .3s,transform .2s; }
-    .btn-oauth:hover { border-color:rgba(200,144,58,.4); color:var(--text); background:rgba(200,144,58,.06); transform:translateY(-2px); }
-
-    /* BANNERS */
     .banner { display:none; margin-bottom:16px; padding:11px 14px; font-size:.72rem; line-height:1.55; letter-spacing:.03em; }
     .banner.error   { background:rgba(255,68,68,.08);  border-left:2px solid rgba(255,90,90,.7);  color:#ffbbbb; }
     .banner.success { background:rgba(74,220,128,.08); border-left:2px solid rgba(74,220,128,.6); color:#a0ffca; }
@@ -144,7 +124,6 @@
     .banner.error.visible { animation:shake .35s ease; }
     .banner.success.visible,.banner.info.visible { animation:fadeUp .3s ease; }
 
-    /* VERIFY NOTICE */
     .verify-notice { display:none; text-align:center; padding:28px 20px; }
     .verify-notice.visible { display:block; animation:fadeUp .4s ease; }
     .verify-icon { font-size:2.4rem; margin-bottom:12px; }
@@ -158,12 +137,10 @@
     .btn-resend:disabled { opacity:.4; cursor:not-allowed; }
     .resend-timer { font-size:.65rem; color:var(--muted); margin-top:10px; }
 
-    /* TERMS */
     .terms { font-size:.58rem; color:rgba(240,237,232,.26); text-align:center; margin-top:16px; line-height:1.7; }
     .terms a { color:rgba(200,144,58,.6); text-decoration:none; transition:color .3s; }
     .terms a:hover { color:var(--gold); }
 
-    /* SUCCESS OVERLAY */
     .success-overlay { display:none; position:absolute; inset:0; background:rgba(10,12,14,.96);
       flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:20; }
     .success-overlay.visible { display:flex; animation:fadeUp .3s ease; }
@@ -172,7 +149,6 @@
     .success-msg { font-size:.66rem; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); }
     .success-sub { font-size:.7rem; color:var(--muted); }
 
-    /* SIDE COLUMNS */
     .side-stats { grid-column:1; display:flex; flex-direction:column; justify-content:center; align-items:flex-end; padding-right:60px; gap:36px; }
     .side-stat { text-align:right; }
     .side-stat-num { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:300; color:rgba(200,144,58,.25); line-height:1; }
@@ -255,15 +231,6 @@
             <span class="btn-label">Unlock My Profile</span>
             <span class="btn-spinner"><span class="spin-ring"></span></span>
           </button>
-          <div class="divider"><span>or continue with</span></div>
-          <div class="oauth-grid">
-            <button class="btn-oauth" id="btn-google" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 9.3A6 6 0 1 0 18 14h-6"/></svg>Google
-            </button>
-            <button class="btn-oauth" id="btn-apple" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 0 1 0 8 4 4 0 0 1 0-8zm0 10c4.4 0 8 1.8 8 4v2H4v-2c0-2.2 3.6-4 8-4z"/></svg>Apple
-            </button>
-          </div>
         </div>
 
         <!-- SIGN UP PANEL -->
@@ -316,26 +283,16 @@
               <span class="btn-label">Create My Profile</span>
               <span class="btn-spinner"><span class="spin-ring"></span></span>
             </button>
-            <div class="divider"><span>or continue with</span></div>
-            <div class="oauth-grid">
-              <button class="btn-oauth" id="btn-google-su" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 9.3A6 6 0 1 0 18 14h-6"/></svg>Google
-              </button>
-              <button class="btn-oauth" id="btn-apple-su" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 0 1 0 8 4 4 0 0 1 0-8zm0 10c4.4 0 8 1.8 8 4v2H4v-2c0-2.2 3.6-4 8-4z"/></svg>Apple
-              </button>
-            </div>
             <p class="terms">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
           </div>
 
-          <!-- Verify notice — shown in-place after signup, NO new page/tab -->
           <div class="verify-notice" id="verifyNotice">
             <div class="verify-icon">&#x2709;&#xFE0F;</div>
             <div class="verify-title">Check Your Inbox</div>
             <p class="verify-text">
               We've sent a verification link to<br>
               <span class="verify-email" id="verifyEmailDisplay"></span><br><br>
-              Click the link in that email — you'll be brought back here automatically and logged in.
+              Click the link in that email — you'll be logged in automatically. No need to sign in again.<br><br>
               Check your <strong>spam / junk</strong> folder too.
             </p>
             <button class="btn-resend" id="btnResend" type="button">
@@ -346,7 +303,7 @@
           </div>
         </div>
 
-        <!-- SUCCESS OVERLAY — shown after confirmed sign-in/up -->
+        <!-- SUCCESS OVERLAY -->
         <div class="success-overlay" id="successOverlay">
           <div class="check-circle">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -371,26 +328,12 @@
 (function () {
   'use strict';
 
-  /* ─────────────────────────────────────────────────────────────────
-     STATE
-  ───────────────────────────────────────────────────────────────── */
   var sb              = null;
   var lastSignupEmail = '';
   var resendCooldown  = null;
-  var redirectHandled = false; // prevent double-redirect from onAuthStateChange
+  var redirectHandled = false;
 
-  /* ─────────────────────────────────────────────────────────────────
-     INIT SUPABASE
-     detectSessionInUrl: true  → Supabase auto-parses the #access_token
-     from the confirmation link URL and creates a session IN THIS TAB.
-     No new tab is opened. The email link target="_self" by default.
-  ───────────────────────────────────────────────────────────────────
-     IMPORTANT: In Supabase Dashboard → Auth → URL Configuration
-     add THIS page's URL to "Redirect URLs", e.g.:
-       http://localhost:5500/login.html
-       https://yourdomain.com/login.html
-  ───────────────────────────────────────────────────────────────────
-  */
+  /* ─── INIT SUPABASE ─────────────────────────────────────────────── */
   function tryInitSupabase() {
     var url  = (typeof SUPABASE_URL  !== 'undefined') ? SUPABASE_URL  : null;
     var anon = (typeof SUPABASE_ANON !== 'undefined') ? SUPABASE_ANON : null;
@@ -400,21 +343,18 @@
         auth: {
           autoRefreshToken: true,
           persistSession: true,
-          detectSessionInUrl: true   // ← KEY: parses token from URL hash in SAME tab
+          detectSessionInUrl: true
         }
       });
     } catch(e) { console.error('Supabase init:', e); }
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     HELPERS
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── HELPERS ───────────────────────────────────────────────────── */
   function $(id) { return document.getElementById(id); }
   function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
 
-  // Build redirect URL that works on localhost, Live Server & production
   function getRedirectUrl() {
-    return window.location.href.split('#')[0].split('?')[0]; // clean URL of THIS page
+    return window.location.origin + '/frontend/login.html';
   }
 
   function errMsg(err) {
@@ -456,11 +396,7 @@
     $('successOverlay').classList.add('visible');
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     FETCH PROFILE FROM public.profiles
-     The DB trigger (handle_new_user) auto-inserts a row when the user
-     is created, so by the time we reach here it should exist.
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── FETCH PROFILE ─────────────────────────────────────────────── */
   async function fetchProfile(userId) {
     if (!sb || !userId) return null;
     try {
@@ -470,7 +406,6 @@
     } catch(e) { return null; }
   }
 
-  /* Pick the best display name: profiles table → auth metadata → email prefix */
   function displayName(user, profile) {
     if (profile && profile.first_name) return profile.first_name;
     var m = user.user_metadata || {};
@@ -479,9 +414,7 @@
     return user.email ? user.email.split('@')[0] : 'there';
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     TABS
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── TABS ──────────────────────────────────────────────────────── */
   function initTabs() {
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
@@ -496,9 +429,7 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     PASSWORD STRENGTH + LIVE VALIDATION
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── PASSWORD STRENGTH ─────────────────────────────────────────── */
   function initPasswordUI() {
     var pw   = $('su-password');
     var conf = $('su-confirm');
@@ -536,11 +467,10 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     VERIFY NOTICE (shown in-place in the signup panel)
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── VERIFY NOTICE ─────────────────────────────────────────────── */
   function showVerifyNotice(email) {
     lastSignupEmail = email;
+    try { sessionStorage.setItem('av_pending_email', email); } catch(e){}
     $('signup-form-body').style.display = 'none';
     $('verifyEmailDisplay').textContent = email;
     $('verifyNotice').classList.add('visible');
@@ -560,19 +490,35 @@
   }
 
   async function handleResend() {
-    if (!sb || !lastSignupEmail) return;
+    if (!lastSignupEmail) {
+      try { lastSignupEmail = sessionStorage.getItem('av_pending_email') || ''; } catch(e){}
+    }
+    if (!sb || !lastSignupEmail) {
+      $('resendTimer').textContent = 'Could not find your email. Please sign up again.';
+      return;
+    }
     var btn=$('btnResend'), timer=$('resendTimer');
     btn.disabled=true; timer.textContent='Sending…';
     try {
-      var r = await sb.auth.resend({ type:'signup', email:lastSignupEmail, options:{ emailRedirectTo: getRedirectUrl() } });
-      if (r.error) { timer.textContent='Error: '+errMsg(r.error); setTimeout(function(){ btn.disabled=false; }, 5000); }
-      else { timer.textContent='Sent! Check your inbox and spam folder.'; startResendCooldown(60); }
-    } catch(e) { timer.textContent='Network error. Try again.'; setTimeout(function(){ btn.disabled=false; }, 3000); }
+      var r = await sb.auth.resend({
+        type: 'signup',
+        email: lastSignupEmail,
+        options: { emailRedirectTo: getRedirectUrl() }
+      });
+      if (r.error) {
+        timer.textContent = 'Error: ' + errMsg(r.error);
+        setTimeout(function(){ btn.disabled=false; }, 5000);
+      } else {
+        timer.textContent = 'Sent! Check your inbox and spam folder.';
+        startResendCooldown(60);
+      }
+    } catch(e) {
+      timer.textContent = 'Network error. Try again.';
+      setTimeout(function(){ btn.disabled=false; }, 3000);
+    }
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     SIGN IN
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── SIGN IN ───────────────────────────────────────────────────── */
   async function handleSignIn() {
     hideBanner('err-signin'); hideBanner('ok-signin'); hideBanner('info-signin');
     var email = $('si-email').value.trim();
@@ -592,21 +538,18 @@
           return showBanner('err-signin', 'Your email is not verified yet. Check your inbox.', 'error');
         return showBanner('err-signin', errMsg(res.error), 'error');
       }
-      // Fetch profile from public.profiles (populated by DB trigger)
       var profile = await fetchProfile(res.data.user.id);
       var name = displayName(res.data.user, profile);
       redirectHandled = true;
       showSuccessOverlay('Welcome back, ' + name + '!', 'Taking you to your garage…');
-      setTimeout(function(){ window.location.href = 'index.html'; }, 1600);
+      setTimeout(function(){ window.location.href = '/frontend/index.html'; }, 1600);
     } catch(e) {
       setLoading(btn, false);
       showBanner('err-signin', 'Network error — check your internet connection.');
     }
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     SIGN UP
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── SIGN UP ───────────────────────────────────────────────────── */
   async function handleSignUp() {
     hideBanner('err-signup'); hideBanner('ok-signup');
     var first = $('su-first').value.trim();
@@ -632,39 +575,26 @@
         password: pass,
         options: {
           data: { first_name: first, last_name: last, full_name: first + ' ' + last },
-          // ← redirects back to THIS same page; detectSessionInUrl parses the token
           emailRedirectTo: getRedirectUrl()
         }
       });
       setLoading(btn, false);
       if (res.error) return showBanner('err-signup', errMsg(res.error), 'error');
 
-      // Email confirmation OFF → instant session → go straight to index
       if (res.data.user && res.data.session) {
         var profile = await fetchProfile(res.data.user.id);
         redirectHandled = true;
         showSuccessOverlay('Garage created. Welcome, ' + (profile && profile.first_name ? profile.first_name : first) + '!', 'Taking you home…');
-        setTimeout(function(){ window.location.href = 'index.html'; }, 1800);
-      }
-      // Email confirmation ON → but first check if this is a duplicate email.
-      // Supabase silently returns a fake user with an EMPTY identities array
-      // when the email is already registered — instead of returning an error.
-      // This is the only reliable way to detect it without a DB query.
-      else if (res.data.user && !res.data.session) {
+        setTimeout(function(){ window.location.href = '/frontend/index.html'; }, 1800);
+      } else if (res.data.user && !res.data.session) {
         var identities = res.data.user.identities || [];
         if (identities.length === 0) {
-          // Empty identities = email already registered
           $('su-email').classList.add('is-invalid');
-          showBanner('err-signup',
-            'An account with this email already exists. Please sign in instead.',
-            'error'
-          );
+          showBanner('err-signup', 'An account with this email already exists. Please sign in instead.', 'error');
         } else {
-          // Genuine new signup — show verification notice
           showVerifyNotice(email);
         }
-      }
-      else {
+      } else {
         showBanner('err-signup', 'This email already has an account. Try signing in.', 'error');
       }
     } catch(e) {
@@ -673,20 +603,7 @@
     }
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     OAUTH
-  ───────────────────────────────────────────────────────────────────  */
-  async function oauthSignIn(provider, errId) {
-    if (!sb) return noAuth(errId);
-    try {
-      var r = await sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: getRedirectUrl() } });
-      if (r.error) showBanner(errId, errMsg(r.error), 'error');
-    } catch(e) { showBanner(errId, provider + ' sign-in unavailable.', 'error'); }
-  }
-
-  /* ─────────────────────────────────────────────────────────────────
-     FORGOT PASSWORD
-  ───────────────────────────────────────────────────────────────────  */
+  /* ─── FORGOT PASSWORD ───────────────────────────────────────────── */
   async function handleForgot(e) {
     e.preventDefault();
     hideBanner('err-signin'); hideBanner('ok-signin'); hideBanner('info-signin');
@@ -694,28 +611,77 @@
     if (!email || !isEmail(email))
       return showBanner('err-signin', 'Enter your email address above first, then click Forgot password.');
     if (!sb) return noAuth('err-signin');
-    var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: getRedirectUrl() });
+    var resetUrl = window.location.origin + '/frontend/reset-password.html';
+    var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: resetUrl });
     if (r.error) return showBanner('err-signin', errMsg(r.error), 'error');
     showBanner('ok-signin', 'Password reset link sent to ' + email + '. Check your inbox.', 'success');
   }
 
-  /* ─────────────────────────────────────────────────────────────────
-     BOOT
-  ───────────────────────────────────────────────────────────────────  */
-  document.addEventListener('DOMContentLoaded', function() {
+  /* ─── TOKEN HANDLER (email link + Safari fix) ───────────────────── */
+  async function handleTokenInUrl() {
+    if (!sb) return false;
+
+    var hash   = window.location.hash   || '';
+    var search = window.location.search || '';
+    var paramStr = '';
+    if (hash.includes('access_token'))        paramStr = hash.replace('#','');
+    else if (search.includes('access_token')) paramStr = search.replace('?','');
+
+    if (!paramStr) return false;
+
+    var params       = new URLSearchParams(paramStr);
+    var accessToken  = params.get('access_token');
+    var refreshToken = params.get('refresh_token');
+    var type         = params.get('type');
+
+    if (!accessToken) return false;
+
+    window.history.replaceState(null, '', window.location.pathname);
+
+    try {
+      var r = await sb.auth.setSession({
+        access_token:  accessToken,
+        refresh_token: refreshToken || ''
+      });
+
+      if (r.error) {
+        console.error('Token exchange failed:', r.error.message);
+        showBanner('err-signin', 'Verification link expired or invalid. Please request a new one.', 'error');
+        document.querySelector('[data-target="panel-signin"]').click();
+        return false;
+      }
+
+      redirectHandled = true;
+      var user    = r.data.session.user;
+      var profile = await fetchProfile(user.id);
+      var name    = displayName(user, profile);
+
+      if (type === 'recovery') {
+        showSuccessOverlay('Identity verified', 'Redirecting to reset your password…');
+        setTimeout(function(){ window.location.href = '/frontend/reset-password.html'; }, 1600);
+      } else {
+        try { sessionStorage.removeItem('av_pending_email'); } catch(e){}
+        showSuccessOverlay('Welcome, ' + name + '!', 'Taking you to your garage…');
+        setTimeout(function(){ window.location.href = '/frontend/index.html'; }, 1600);
+      }
+      return true;
+    } catch(e) {
+      console.error('handleTokenInUrl error:', e);
+      return false;
+    }
+  }
+
+  /* ─── BOOT ──────────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', async function() {
     initTabs();
     initPasswordUI();
     tryInitSupabase();
 
     if (!sb) return;
 
-    /*
-      onAuthStateChange fires with SIGNED_IN in two cases:
-        1. Normal login (handled in handleSignIn above, redirectHandled=true)
-        2. Email confirmation link clicked → user lands back on THIS page
-           → Supabase parses #access_token from URL → session created → fires here
-      We only act on case 2 (redirectHandled === false)
-    */
+    var tokenHandled = await handleTokenInUrl();
+    if (tokenHandled) return;
+
     sb.auth.onAuthStateChange(async function(evt, session) {
       if (redirectHandled) return;
       if ((evt === 'SIGNED_IN' || evt === 'USER_UPDATED') && session) {
@@ -724,34 +690,27 @@
         var profile = await fetchProfile(user.id);
         var name    = displayName(user, profile);
         showSuccessOverlay('Welcome, ' + name + '!', 'Taking you to your garage…');
-        setTimeout(function(){ window.location.href = 'index.html'; }, 1600);
+        setTimeout(function(){ window.location.href = '/frontend/index.html'; }, 1600);
       }
     });
 
-    // If already logged in (returning visitor), skip login page entirely
     sb.auth.getSession().then(function(r) {
-      if (r.data && r.data.session && !window.location.hash.includes('access_token')) {
+      if (redirectHandled) return;
+      if (r.data && r.data.session) {
         redirectHandled = true;
-        window.location.href = 'index.html';
+        window.location.href = '/frontend/index.html';
       }
     }).catch(function(){});
 
-    // Wire up all buttons
     $('btn-signin').addEventListener('click',    handleSignIn);
     $('btn-signup').addEventListener('click',    handleSignUp);
     $('forgotLink').addEventListener('click',    handleForgot);
     $('btnResend').addEventListener('click',     handleResend);
 
-    // Enter key on all fields
     $('si-email').addEventListener('keydown',    function(e){ if(e.key==='Enter') handleSignIn(); });
     $('si-password').addEventListener('keydown', function(e){ if(e.key==='Enter') handleSignIn(); });
     $('su-email').addEventListener('keydown',    function(e){ if(e.key==='Enter') handleSignUp(); });
     $('su-confirm').addEventListener('keydown',  function(e){ if(e.key==='Enter') handleSignUp(); });
-
-    $('btn-google').addEventListener('click',    function(){ oauthSignIn('google','err-signin'); });
-    $('btn-apple').addEventListener('click',     function(){ oauthSignIn('apple', 'err-signin'); });
-    $('btn-google-su').addEventListener('click', function(){ oauthSignIn('google','err-signup'); });
-    $('btn-apple-su').addEventListener('click',  function(){ oauthSignIn('apple', 'err-signup'); });
   });
 
 })();

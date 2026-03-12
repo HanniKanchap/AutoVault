@@ -1,4 +1,3 @@
-
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -188,14 +187,18 @@ nav {
 .nav-garage svg { transition: stroke .3s; }
 .nav-garage:hover svg { stroke: var(--dark) !important; }
 
-/* avatar shown when logged in */
+/* ── NAV AVATAR (logged-in state) ── */
 .nav-avatar {
   display: none;
   align-items: center; gap: 10px;
   cursor: pointer;
   position: relative;
+  /* Invisible bridge so cursor can travel from trigger into dropdown */
+  padding-bottom: 22px;
+  margin-bottom: -22px;
 }
 .nav-avatar.show { display: flex; }
+
 .nav-avatar-circle {
   width: 34px; height: 34px;
   border-radius: 50%;
@@ -209,15 +212,44 @@ nav {
   font-size: .7rem; letter-spacing: .12em;
   text-transform: uppercase; color: var(--text);
 }
+
+/* Dropdown: use opacity/visibility + transition-delay instead of display:none */
 .nav-avatar-dropdown {
-  position: absolute; top: calc(100% + 14px); right: 0;
+  position: absolute;
+  top: calc(100% - 22px); /* overlap the padding bridge */
+  right: 0;
   background: #16191c;
   border: 1px solid rgba(200,144,58,.2);
   min-width: 180px;
-  display: none; flex-direction: column;
+  display: flex;           /* always flex, not toggled */
+  flex-direction: column;
   z-index: 200;
+
+  /* Hidden state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  pointer-events: none;
+
+  /* Delay the HIDE so cursor has time to enter the dropdown */
+  transition:
+    opacity .2s ease,
+    transform .2s ease,
+    visibility 0s linear .25s;
 }
-.nav-avatar:hover .nav-avatar-dropdown { display: flex; }
+
+/* Show on hover — instant appear */
+.nav-avatar:hover .nav-avatar-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: all;
+  transition:
+    opacity .2s ease,
+    transform .2s ease,
+    visibility 0s linear 0s;
+}
+
 .nav-avatar-dropdown a {
   padding: 12px 20px;
   font-size: .7rem; letter-spacing: .14em;
@@ -225,7 +257,9 @@ nav {
   text-decoration: none;
   border-bottom: 1px solid rgba(255,255,255,.04);
   transition: color .3s, background .3s;
+  white-space: nowrap;
 }
+.nav-avatar-dropdown a:last-child { border-bottom: none; }
 .nav-avatar-dropdown a:hover { color: var(--gold); background: rgba(200,144,58,.05); }
 .nav-avatar-dropdown a.logout { color: rgba(255,100,100,.7); }
 .nav-avatar-dropdown a.logout:hover { color: #ff6464; background: rgba(255,68,68,.05); }
@@ -1300,10 +1334,8 @@ footer .logo { font-size: 1.4rem; }
   letter-spacing: .06em;
 }
 
-/* responsive */
 /* ── RESPONSIVE ── */
 
-/* When nav items don't fit, show hamburger */
 @media(max-width: 1100px) {
   .menu-icon { display: flex; }
   .nav-links { display: none !important; }
