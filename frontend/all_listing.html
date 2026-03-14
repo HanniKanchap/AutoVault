@@ -109,10 +109,14 @@
     .compare-bar,.toast,footer{position:relative;z-index:1}
 
     /* ── CURSOR ── */
-    #cur{width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .25s,height .25s}
-    #curR{width:32px;height:32px;border:1px solid rgba(200,144,58,.4);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s}
-    body.hov #cur{width:16px;height:16px}
-    body.hov #curR{width:52px;height:52px}
+    /* ── CURSOR ── */
+    #cur,#curR{position:fixed;top:0;left:0;pointer-events:none;border-radius:50%;will-change:transform;}
+    #cur{width:10px;height:10px;background:var(--gold);z-index:9999;transition:width .18s,height .18s,opacity .18s;}
+    #curR{width:36px;height:36px;border:1.5px solid rgba(200,144,58,.55);background:rgba(200,144,58,.04);z-index:9998;transition:width .25s,height .25s,border-color .25s,background .25s;}
+    body.hov #cur{width:6px;height:6px;opacity:.7}
+    body.hov #curR{width:54px;height:54px;border-color:rgba(200,144,58,.85);background:rgba(200,144,58,.07);}
+    html{cursor:none !important}
+    a,button,label,select,input,[onclick]{cursor:none !important}
 
     /* ── NAV ── */
     nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;background:rgba(8,10,12,.93);border-bottom:1px solid rgba(200,144,58,.1);backdrop-filter:blur(24px)}
@@ -386,14 +390,17 @@
       background:rgba(8,10,12,.98);
       border-bottom:1px solid rgba(200,144,58,.12);
       backdrop-filter:blur(24px);
+      overflow:visible;
     }
     .fb-inner{
       display:flex;align-items:center;
       padding:0 60px;
       height:56px;
       gap:6px;
-      overflow-x:auto;
+      flex-wrap:nowrap;
+      overflow:visible;
       scrollbar-width:none;
+      position:relative;
     }
     .fb-inner::-webkit-scrollbar{display:none}
     /* subtle gold line at bottom */
@@ -412,7 +419,7 @@
     .fb-spacer{flex:1}
 
     /* Filter chip buttons */
-    .flt{position:relative;flex-shrink:0}
+    .flt{position:relative;flex-shrink:0;overflow:visible}
     .flt-btn{
       display:flex;align-items:center;gap:8px;
       padding:7px 16px;
@@ -426,9 +433,26 @@
       color:var(--muted);white-space:nowrap;
       transition:color .2s,background .2s,border-color .2s;
     }
-    .flt-btn:hover{color:var(--text);background:rgba(200,144,58,.06);border-color:rgba(200,144,58,.25)}
-    .flt.open .flt-btn{color:var(--gold);background:rgba(200,144,58,.08);border-color:rgba(200,144,58,.4)}
-    .flt.has-active .flt-btn{color:var(--gold);border-color:rgba(200,144,58,.5);background:rgba(200,144,58,.1)}
+    .flt-btn:hover{
+      color:var(--text);
+      background:rgba(200,144,58,.07);
+      border-color:rgba(200,144,58,.3);
+      box-shadow:0 0 12px rgba(200,144,58,.08);
+    }
+    .flt.open .flt-btn{
+      color:var(--gold);
+      background:rgba(200,144,58,.1);
+      border-color:rgba(200,144,58,.55);
+      border-bottom-color:transparent;
+      box-shadow:0 0 16px rgba(200,144,58,.15), inset 0 1px 0 rgba(200,144,58,.1);
+      border-radius:2px 2px 0 0;
+    }
+    .flt.has-active .flt-btn{
+      color:var(--gold);
+      border-color:rgba(200,144,58,.5);
+      background:rgba(200,144,58,.1);
+      box-shadow:0 0 10px rgba(200,144,58,.1);
+    }
     .flt-cnt{
       min-width:16px;height:16px;border-radius:8px;
       background:var(--gold);color:var(--dark);
@@ -443,41 +467,296 @@
       transition:transform .25s;flex-shrink:0;opacity:.5;
     }
     .flt.open .flt-chev{transform:rotate(-135deg) translateY(2px)}
-    .flt-panel{
-      position:absolute;top:calc(100% + 8px);left:0;min-width:240px;
-      background:rgba(10,12,14,.99);
+    /* ════════════════════════════════════════════
+       FILTER PANEL & OPTIONS — clean, always-visible
+       ════════════════════════════════════════════ */
+
+    /* Panel: zero-gap flush dropdown with triangle caret */
+    /* ═══════════════════════════════════════════
+       DROPDOWN PANELS — rich animated design
+       ═══════════════════════════════════════════ */
+    .flt-panel, .sort-panel{
+      position:fixed;
+      background:linear-gradient(160deg, rgba(12,14,18,.98) 0%, rgba(8,10,13,.99) 100%);
       border:1px solid rgba(200,144,58,.2);
       border-top:2px solid var(--gold);
-      backdrop-filter:blur(24px);
-      opacity:0;pointer-events:none;
-      transform:translateY(-6px);
-      transition:opacity .22s ease,transform .22s cubic-bezier(.25,.46,.45,.94);
-      z-index:600;box-shadow:0 20px 50px rgba(0,0,0,.8);
+      backdrop-filter:blur(32px) saturate(180%);
+      -webkit-backdrop-filter:blur(32px) saturate(180%);
+      z-index:900;
+      box-shadow:
+        0 4px 6px rgba(0,0,0,.3),
+        0 20px 60px rgba(0,0,0,.8),
+        inset 0 1px 0 rgba(255,255,255,.04),
+        inset 0 0 40px rgba(200,144,58,.015);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform:translateY(-8px) scaleY(.96);
+      transform-origin:top center;
+      transition:
+        opacity .22s cubic-bezier(.4,0,.2,1),
+        transform .28s cubic-bezier(.34,1.5,.64,1),
+        visibility 0s linear .22s;
+      overflow:hidden;
     }
-    .flt.open .flt-panel{opacity:1;pointer-events:all;transform:translateY(0)}
-    .flt-ph{padding:12px 16px 8px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between}
-    .flt-ph-title{font-size:.55rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(200,144,58,.6)}
-    .flt-clr{font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'Barlow',sans-serif;transition:color .2s}
-    .flt-clr:hover{color:var(--gold)}
-    .flt-opts{padding:6px 0;max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(200,144,58,.2) transparent}
-    .flt-opt{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;cursor:pointer;transition:background .2s;position:relative;border-bottom:1px solid rgba(255,255,255,.025)}
-    .flt-opt:last-child{border-bottom:none}
-    .flt-opt:hover{background:rgba(200,144,58,.04)}
-    .flt-opt.sel{background:rgba(200,144,58,.07)}
-    .flt-opt::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);transform:scaleY(0);transform-origin:center;transition:transform .2s}
-    .flt-opt.sel::before{transform:scaleY(1)}
-    .flt-ol{display:flex;align-items:center;gap:10px}
-    .flt-box{width:14px;height:14px;flex-shrink:0;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
-    .flt-opt.sel .flt-box{background:var(--gold);border-color:var(--gold)}
-    .flt-box svg{stroke:#080a0c;opacity:0;transition:opacity .15s,transform .15s;transform:scale(.5)}
-    .flt-opt.sel .flt-box svg{opacity:1;transform:scale(1)}
-    .flt-on{font-size:.78rem;color:var(--muted);transition:color .2s}
-    .flt-opt.sel .flt-on{color:var(--text)}
-    .flt-oc{font-size:.6rem;color:rgba(240,237,232,.2)}
+    .flt-panel{ min-width:260px; }
+    .sort-panel{ width:220px; }
 
-    /* Range */
-    .flt-range{padding:14px 16px 16px}
-    .range-disp{display:flex;justify-content:space-between;margin-bottom:10px}
+    .flt.open .flt-panel,
+    .sort-dd.open .sort-panel{
+      opacity:1;
+      visibility:visible;
+      pointer-events:all;
+      transform:translateY(0) scaleY(1);
+      transition:
+        opacity .22s cubic-bezier(.4,0,.2,1),
+        transform .28s cubic-bezier(.34,1.5,.64,1),
+        visibility 0s linear 0s;
+    }
+
+    /* Gold shimmer line at very top of panel */
+    .flt-panel::before, .sort-panel::before{
+      content:'';
+      position:absolute;
+      top:0; left:-100%; right:-100%; height:1px;
+      background:linear-gradient(90deg, transparent 0%, rgba(200,144,58,.6) 30%, rgba(232,176,96,.9) 50%, rgba(200,144,58,.6) 70%, transparent 100%);
+      pointer-events:none;
+      animation:panelShimmer .6s .1s ease forwards;
+      opacity:0;
+    }
+    @keyframes panelShimmer{
+      0%{opacity:0;transform:translateX(-20%)}
+      40%{opacity:1}
+      100%{opacity:.5;transform:translateX(20%)}
+    }
+
+    /* Subtle corner accent */
+    .flt-panel::after, .sort-panel::after{
+      content:'';
+      position:absolute;
+      bottom:0; right:0;
+      width:40px; height:40px;
+      background:radial-gradient(circle at 100% 100%, rgba(200,144,58,.06) 0%, transparent 70%);
+      pointer-events:none;
+    }
+
+    /* Panel header */
+    .flt-ph{
+      padding:12px 16px 10px;
+      border-bottom:1px solid rgba(200,144,58,.1);
+      display:flex;align-items:center;justify-content:space-between;
+      background:linear-gradient(to right, rgba(200,144,58,.06), rgba(200,144,58,.02));
+      position:relative;
+      overflow:hidden;
+    }
+    /* Header left accent line */
+    .flt-ph::before{
+      content:'';
+      position:absolute; left:0; top:0; bottom:0; width:2px;
+      background:linear-gradient(to bottom, transparent, var(--gold), transparent);
+    }
+    .flt-ph-title{
+      font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;
+      color:var(--gold);font-weight:600;
+      text-shadow:0 0 12px rgba(200,144,58,.4);
+    }
+    .flt-clr{
+      font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(240,237,232,.3);background:none;border:none;
+      cursor:pointer;font-family:'Barlow',sans-serif;
+      transition:color .2s, text-shadow .2s;padding:0;
+    }
+    .flt-clr:hover{
+      color:var(--gold);
+      text-shadow:0 0 8px rgba(200,144,58,.5);
+    }
+
+    /* Options list */
+    .flt-opts{
+      padding:6px 0 4px;
+      max-height:300px;
+      overflow-y:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(200,144,58,.2) transparent;
+    }
+    .flt-opts::-webkit-scrollbar{width:3px;}
+    .flt-opts::-webkit-scrollbar-thumb{background:rgba(200,144,58,.25);border-radius:2px;}
+
+    /* Individual option row */
+    .flt-opt{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 16px 10px 18px;
+      cursor:pointer;
+      position:relative;
+      border-bottom:1px solid rgba(255,255,255,.028);
+      opacity:0;
+      transform:translateX(-6px);
+      animation:fltRowIn .25s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    .flt-opt:last-child{border-bottom:none;}
+
+    @keyframes fltRowIn{
+      to{opacity:1;transform:translateX(0);}
+    }
+
+    /* Stagger via nth-child */
+    .flt-opt:nth-child(1){animation-delay:.04s}
+    .flt-opt:nth-child(2){animation-delay:.07s}
+    .flt-opt:nth-child(3){animation-delay:.10s}
+    .flt-opt:nth-child(4){animation-delay:.13s}
+    .flt-opt:nth-child(5){animation-delay:.16s}
+    .flt-opt:nth-child(6){animation-delay:.19s}
+    .flt-opt:nth-child(7){animation-delay:.22s}
+    .flt-opt:nth-child(8){animation-delay:.25s}
+    .flt-opt:nth-child(n+9){animation-delay:.28s}
+
+    /* Hover background sweep */
+    .flt-opt::after{
+      content:'';
+      position:absolute;inset:0;
+      background:linear-gradient(90deg, rgba(200,144,58,.06) 0%, rgba(200,144,58,.02) 100%);
+      opacity:0;
+      transition:opacity .18s;
+    }
+    .flt-opt:hover::after{opacity:1;}
+
+    /* Gold left accent bar */
+    .flt-opt-bar{
+      position:absolute;left:0;top:10%;bottom:10%;width:2px;
+      background:linear-gradient(to bottom, transparent, var(--gold), transparent);
+      transform:scaleY(0);transform-origin:center;
+      transition:transform .2s cubic-bezier(.34,1.4,.64,1);
+      border-radius:1px;
+    }
+    .flt-opt.sel .flt-opt-bar{transform:scaleY(1);}
+
+    .flt-opt.sel{background:rgba(200,144,58,.07);}
+
+    /* Checkbox */
+    .flt-ol{display:flex;align-items:center;gap:11px;position:relative;z-index:1;}
+    .flt-box{
+      width:15px;height:15px;flex-shrink:0;
+      border:1px solid rgba(255,255,255,.15);
+      display:flex;align-items:center;justify-content:center;
+      transition:background .18s, border-color .18s, box-shadow .18s, transform .15s;
+      border-radius:2px;
+    }
+    .flt-opt:hover .flt-box{
+      border-color:rgba(200,144,58,.6);
+      transform:scale(1.05);
+    }
+    .flt-opt.sel .flt-box{
+      background:var(--gold);
+      border-color:var(--gold);
+      box-shadow:0 0 8px rgba(200,144,58,.4);
+      transform:scale(1);
+    }
+    .flt-box svg{
+      stroke:#080a0c;opacity:0;
+      transition:opacity .15s,transform .18s cubic-bezier(.34,1.6,.64,1);
+      transform:scale(.3) rotate(-20deg);
+    }
+    .flt-opt.sel .flt-box svg{opacity:1;transform:scale(1) rotate(0deg);}
+
+    /* Labels */
+    .flt-on{
+      font-size:.8rem;color:rgba(240,237,232,.55);
+      transition:color .15s, letter-spacing .15s;
+      position:relative;z-index:1;
+    }
+    .flt-opt.sel .flt-on{color:var(--text); font-weight:500;}
+    .flt-opt:hover .flt-on{color:rgba(240,237,232,.9);}
+
+    .flt-oc{
+      font-size:.6rem;color:rgba(240,237,232,.18);
+      transition:color .15s, transform .15s;
+      position:relative;z-index:1;
+      min-width:24px;text-align:right;
+    }
+    .flt-opt:hover .flt-oc{color:rgba(200,144,58,.6);transform:translateX(-2px);}
+    .flt-opt.sel .flt-oc{color:rgba(200,144,58,.5);}
+
+    /* Ripple */
+    .flt-opt-ripple{
+      position:absolute;border-radius:50%;
+      background:rgba(200,144,58,.18);
+      transform:scale(0);
+      animation:fltRipple .5s ease-out forwards;
+      pointer-events:none;z-index:2;
+    }
+    @keyframes fltRipple{to{transform:scale(5);opacity:0;}}
+
+    /* Chevron */
+    .flt-chev{
+      width:5px;height:5px;
+      border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+      transform:rotate(45deg) translateY(-2px);
+      transition:transform .28s cubic-bezier(.34,1.4,.64,1);
+      flex-shrink:0;opacity:.5;
+    }
+    .flt.open .flt-chev,.sort-dd.open .flt-chev{transform:rotate(-135deg) translateY(2px);}
+
+    /* Sort options */
+    .sort-opt{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px 12px 18px;
+      cursor:pointer;
+      font-size:.72rem;color:rgba(240,237,232,.5);
+      border-bottom:1px solid rgba(255,255,255,.028);
+      transition:color .18s, background .18s;
+      position:relative;
+      opacity:0;
+      transform:translateX(-6px);
+      animation:fltRowIn .25s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    .sort-opt:last-child{border-bottom:none;}
+
+    /* Sort hover sweep */
+    .sort-opt::before{
+      content:'';
+      position:absolute;inset:0;
+      background:linear-gradient(90deg, rgba(200,144,58,.07) 0%, transparent 100%);
+      opacity:0;transition:opacity .18s;
+    }
+    .sort-opt:hover::before,.sort-opt.act::before{opacity:1;}
+
+    /* Sort active left bar */
+    .sort-opt::after{
+      content:'';
+      position:absolute;left:0;top:15%;bottom:15%;width:2px;
+      background:linear-gradient(to bottom,transparent,var(--gold),transparent);
+      transform:scaleY(0);transform-origin:center;
+      transition:transform .22s cubic-bezier(.34,1.4,.64,1);
+      border-radius:1px;
+    }
+    .sort-opt.act::after{transform:scaleY(1);}
+
+    .sort-opt:hover,.sort-opt.act{
+      color:var(--gold);
+    }
+    .sort-opt.act{
+      background:rgba(200,144,58,.06);
+      letter-spacing:.015em;
+    }
+    .sort-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 6px rgba(200,144,58,.6);
+      opacity:0;flex-shrink:0;
+      transition:opacity .18s, transform .22s cubic-bezier(.34,1.6,.64,1);
+      transform:scale(0);
+    }
+    .sort-opt.act .sort-dot{opacity:1;transform:scale(1);}
+
+    /* Sort stagger */
+    .sort-opt:nth-child(1){animation-delay:.04s;}
+    .sort-opt:nth-child(2){animation-delay:.07s;}
+    .sort-opt:nth-child(3){animation-delay:.10s;}
+    .sort-opt:nth-child(4){animation-delay:.13s;}
+    .sort-opt:nth-child(5){animation-delay:.16s;}
+    .sort-opt:nth-child(6){animation-delay:.19s;}
+
+        .range-disp{display:flex;justify-content:space-between;margin-bottom:10px}
     .range-v{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--gold)}
     .range-l{font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px}
     .range-sw{position:relative;padding:6px 0;margin-bottom:4px}
@@ -522,21 +801,13 @@
     .fb-search-wrap.expanded::after{transform:scaleX(1)}
 
     /* Sort dropdown */
-    .sort-dd{position:relative;border-right:1px solid rgba(255,255,255,.05)}
+    .sort-dd{position:relative;overflow:visible;border-right:1px solid rgba(255,255,255,.05)}
     .sort-tr{display:flex;align-items:center;gap:8px;padding:0 18px;height:56px;background:none;border:none;cursor:pointer;font-family:'Barlow',sans-serif;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .25s,background .25s}
     .sort-tr:hover,.sort-dd.open .sort-tr{color:var(--text);background:rgba(200,144,58,.04)}
     .sort-tr svg{stroke:rgba(200,144,58,.4)}
-    .sort-panel{position:absolute;top:calc(100% + 1px);right:0;width:210px;background:rgba(10,13,16,.98);border:1px solid rgba(200,144,58,.18);border-top:2px solid var(--gold);backdrop-filter:blur(24px);opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .25s,transform .25s;z-index:600;box-shadow:0 24px 60px rgba(0,0,0,.7)}
-    .sort-dd.open .sort-panel{opacity:1;pointer-events:all;transform:translateY(0)}
-    .sort-opt{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;font-size:.72rem;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03);transition:color .2s,background .2s}
-    .sort-opt:last-child{border-bottom:none}
-    .sort-opt:hover,.sort-opt.act{color:var(--gold);background:rgba(200,144,58,.05)}
-    .sort-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:0;flex-shrink:0;transition:opacity .2s}
-    .sort-opt.act .sort-dot{opacity:1}
-
     /* View toggle */
     .view-tog{display:flex}
-    .vbtn{width:50px;height:56px;display:flex;align-items:center;justify-content:center;border:none;border-left:1px solid rgba(255,255,255,.05);background:transparent;cursor:pointer;transition:background .25s}
+    .vbtn{width:50px;height:56px;display:flex;align-items:center;justify-content:center;border:none;border-left:1px solid rgba(255,255,255,.05);background:transparent;cursor:none;transition:background .25s}
     .vbtn svg{stroke:rgba(240,237,232,.25);transition:stroke .25s}
     .vbtn.act{background:rgba(200,144,58,.08)}
     .vbtn.act svg{stroke:var(--gold)}
@@ -576,11 +847,20 @@
     .car-card:hover::before,.car-card:hover::after{opacity:1}
 
     /* Visual */
-    .cvis{position:relative;overflow:hidden;aspect-ratio:16/10;flex-shrink:0}
-    .cvis-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform .7s cubic-bezier(.25,.46,.45,.94);position:relative}
-    .car-card:hover .cvis-in{transform:scale(1.06)}
-    .cvis-in::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none}
-    .car-card:hover .cvis-in::after{transform:translateX(100%);transition:transform .8s ease}
+    .cvis{position:relative;overflow:hidden;aspect-ratio:16/10;flex-shrink:0;background:#0d1014;}
+    .cvis-in{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    /* Scale the IMG directly for crisp rendering — not a wrapping div */
+    .cvis-in img{
+      width:100%;height:100%;object-fit:cover;display:block;
+      transform:scale(1);
+      transition:transform .7s cubic-bezier(.25,.46,.45,.94);
+      image-rendering:auto;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+    .car-card:hover .cvis-in img{transform:scale(1.055);}
+    .cvis-in::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.025) 50%,transparent 60%);transform:translateX(-100%);pointer-events:none;z-index:1;}
+    .car-card:hover .cvis-in::after{transform:translateX(100%);transition:transform .8s ease;}
     .cvis::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,10,12,.95) 0%,rgba(8,10,12,0) 55%);pointer-events:none;z-index:1}
 
     /* Hover overlay with action buttons */
@@ -699,8 +979,9 @@
     .cas-cmp{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:var(--muted)}
     .cas-cmp::before{background:rgba(100,160,255,.07)}
     .cas-cmp:hover::before,.cas-cmp.on::before{transform:translateX(0)}
-    .cas-cmp:hover,.cas-cmp.on{color:#7ab4ff;border-color:rgba(100,160,255,.3)}
+    .cas-cmp:hover,.cas-cmp.on{color:#7ab4ff;border-color:rgba(100,160,255,.4);background:rgba(100,160,255,.06)}
     .cas-cmp svg{stroke:currentColor;flex-shrink:0}
+    .cas-cmp.on{background:rgba(100,160,255,.1);border-color:rgba(100,160,255,.5)}
     .cas-view{background:var(--gold);border:1px solid var(--gold);color:var(--dark);flex:1.4}
     .cas-view::before{background:rgba(255,255,255,.12)}
     .cas-view:hover::before{transform:translateX(0)}
@@ -971,7 +1252,7 @@
       <div class="ph-meta">
         <span class="ph-meta-desc">Handpicked masterpieces of engineering &amp; design</span>
         <div class="ph-divider"></div>
-        <div class="ph-pill"><div class="ph-dot"></div><span>320+ Available Now</span></div>
+        <div class="ph-pill"><div class="ph-dot"></div><span id="heroPill">17,000+ Available Now</span></div>
       </div>
     </div>
 
@@ -1001,28 +1282,44 @@
       <div class="fb-sep"></div>
 
       <!-- Filter chips -->
+
+      <!-- BRAND -->
       <div class="flt" id="flt-brand">
         <button class="flt-btn" onclick="tgl('flt-brand')">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           <span>Brand</span><span class="flt-cnt" id="cnt-brand">0</span><span class="flt-chev"></span>
         </button>
         <div class="flt-panel">
-          <div class="flt-ph"><span class="flt-ph-title">Select Brands</span><button class="flt-clr" onclick="clrF('brand',event)">Clear</button></div>
+          <div class="flt-ph"><span class="flt-ph-title">Select Brand</span><button class="flt-clr" onclick="clrF('brand',event)">Clear</button></div>
           <div class="flt-opts" id="opts-brand"></div>
         </div>
       </div>
 
-      <div class="flt" id="flt-body">
-        <button class="flt-btn" onclick="tgl('flt-body')">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
-          <span>Body</span><span class="flt-cnt" id="cnt-body">0</span><span class="flt-chev"></span>
+      <!-- FUEL TYPE -->
+      <div class="flt" id="flt-fuel">
+        <button class="flt-btn" onclick="tgl('flt-fuel')">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 22V8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14"/><path d="M18 22V10.5"/><path d="M13 12h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1"/><line x1="3" y1="22" x2="21" y2="22"/></svg>
+          <span>Fuel</span><span class="flt-cnt" id="cnt-fuel">0</span><span class="flt-chev"></span>
         </button>
         <div class="flt-panel">
-          <div class="flt-ph"><span class="flt-ph-title">Body Style</span><button class="flt-clr" onclick="clrF('body',event)">Clear</button></div>
+          <div class="flt-ph"><span class="flt-ph-title">Fuel Type</span><button class="flt-clr" onclick="clrF('fuel_type',event)">Clear</button></div>
+          <div class="flt-opts" id="opts-fuel"></div>
+        </div>
+      </div>
+
+      <!-- GEARBOX / TRANSMISSION -->
+      <div class="flt" id="flt-body">
+        <button class="flt-btn" onclick="tgl('flt-body')">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/></svg>
+          <span>Gearbox</span><span class="flt-cnt" id="cnt-body">0</span><span class="flt-chev"></span>
+        </button>
+        <div class="flt-panel">
+          <div class="flt-ph"><span class="flt-ph-title">Transmission</span><button class="flt-clr" onclick="clrF('transmission',event)">Clear</button></div>
           <div class="flt-opts" id="opts-body"></div>
         </div>
       </div>
 
+      <!-- YEAR -->
       <div class="flt" id="flt-year">
         <button class="flt-btn" onclick="tgl('flt-year')">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1034,6 +1331,7 @@
         </div>
       </div>
 
+      <!-- PRICE RANGE -->
       <div class="flt" id="flt-price">
         <button class="flt-btn" onclick="tgl('flt-price')">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -1043,8 +1341,8 @@
           <div class="flt-ph"><span class="flt-ph-title">Budget Range</span><button class="flt-clr" onclick="clrPrice()">Reset</button></div>
           <div class="flt-range">
             <div class="range-disp">
-              <div><span class="range-v">$50K</span><span class="range-l">Minimum</span></div>
-              <div style="text-align:right"><span class="range-v" id="rMax">$500K+</span><span class="range-l">Maximum</span></div>
+              <div><span class="range-v">Min</span><span class="range-l">Minimum</span></div>
+              <div style="text-align:right"><span class="range-v" id="rMax">Any</span><span class="range-l">Maximum</span></div>
             </div>
             <div class="range-sw">
               <input type="range" id="pSlider" min="50" max="500" value="500" step="10" oninput="onPrice(this)"/>
@@ -1062,13 +1360,13 @@
       <div class="sort-dd" id="sortDd">
         <button class="sort-tr" onclick="tgl('sortDd')">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
-          <span id="sortLbl">Featured</span>
+          <span id="sortLbl">Price ↓</span>
           <span class="flt-chev"></span>
         </button>
         <div class="sort-panel">
-          <div class="sort-opt act" data-s="featured"   onclick="setSort(this,'Featured')">Featured <span class="sort-dot"></span></div>
+          <div class="sort-opt" data-s="featured"   onclick="setSort(this,'Featured')">Featured <span class="sort-dot"></span></div>
           <div class="sort-opt" data-s="price-asc"  onclick="setSort(this,'Price ↑')">Price: Low → High <span class="sort-dot"></span></div>
-          <div class="sort-opt" data-s="price-desc" onclick="setSort(this,'Price ↓')">Price: High → Low <span class="sort-dot"></span></div>
+          <div class="sort-opt act" data-s="price-desc" onclick="setSort(this,'Price ↓')">Price: High → Low <span class="sort-dot"></span></div>
           <div class="sort-opt" data-s="year-desc"  onclick="setSort(this,'Newest')">Newest First <span class="sort-dot"></span></div>
           <div class="sort-opt" data-s="hp-desc"    onclick="setSort(this,'Powerful')">Most Powerful <span class="sort-dot"></span></div>
           <div class="sort-opt" data-s="az"         onclick="setSort(this,'A→Z')">A → Z <span class="sort-dot"></span></div>
@@ -1130,12 +1428,6 @@
   </footer>
 
 <script>
-/* ── Cursor ── */
-const cur=document.getElementById('cur'),curR=document.getElementById('curR');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
-(function t(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(t);})();
-document.addEventListener('mouseover',e=>{document.body.classList.toggle('hov',!!e.target.closest('a,button,.car-card,.flt-opt,.sort-opt,.rb-item'));});
 
 
 
