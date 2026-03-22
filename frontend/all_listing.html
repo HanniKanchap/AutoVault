@@ -6,7 +6,7 @@
     <title>The Vault — All Vehicles</title>
     
     <link href="styles.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&family=Syncopate:wght@400;700&display=swap" rel="stylesheet" />
     
     <style>
         /* ── PAGE SPECIFIC STYLES ── */
@@ -36,7 +36,7 @@
 
         /* ── ADVANCED FILTER BAR ── */
         .vault-filters {
-            position: sticky; top: 0; z-index: 100;
+            position: relative; z-index: 100;
             background: rgba(10,10,12,0.9); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.05);
             padding: 20px 0; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
@@ -46,6 +46,16 @@
         .vf-ctrl { display: flex; flex-direction: column; gap: 5px; min-width: 180px; }
         .vf-ctrl label { font-family: 'Inter'; font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; }
         
+        .vf-range-multi {
+            -webkit-appearance: none; position: absolute; left: 0; top: 15px; width: 100%; margin: 0;
+            background: transparent; pointer-events: none; outline: none; z-index: 10;
+        }
+        .vf-range-multi::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: #ff3300; cursor: pointer; pointer-events: auto; border: 2px solid #000; transition: transform 0.2s;
+        }
+        .vf-range-multi::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
         .vf-select {
             appearance: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
             color: #fff; padding: 12px 16px; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 600;
@@ -121,8 +131,8 @@
         .cas-view:hover::before { transform: translateX(100%) skewX(-15deg); }
 
         /* Full page loader */
-        #page-loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0a0a0c; z-index: 9999; display: flex; align-items: center; justify-content: center; color: #ff3300; font-family: 'Syne'; font-size: 2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; transition: opacity 0.8s ease; }
-        .loader-ring { width: 60px; height: 60px; border: 3px solid rgba(255,51,0,0.2); border-top-color: #ff3300; border-radius: 50%; margin-bottom: 20px; animation: spin 1s linear infinite; }
+        #page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #0a0a0c; z-index: 9999; display: flex; align-items: center; justify-content: center; color: #ff3300; font-family: 'Syncopate', sans-serif; font-size: 1.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.35em; transition: opacity 0.8s ease; flex-direction: column; }
+        .loader-ring { width: 50px; height: 50px; border: 2px solid rgba(255, 51, 0, 0.15); border-top: 2px solid #ff3300; border-radius: 50%; margin-bottom: 35px; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -191,6 +201,18 @@
                     </select>
                 </div>
                 
+                <div class="vf-ctrl" style="min-width: 220px;">
+                    <label style="display:flex; justify-content:space-between;">
+                        <span>Price Range</span>
+                        <span id="price-display" style="color:#ff3300; font-weight:700;">₹0L - ₹80L+</span>
+                    </label>
+                    <div style="position:relative; height:35px;">
+                        <div style="position:absolute; width:100%; height:4px; background:rgba(255,255,255,0.1); top:22px; border-radius:2px;"></div>
+                        <input type="range" id="filter-price-min" class="vf-range-multi" min="0" max="80" value="0" step="5">
+                        <input type="range" id="filter-price-max" class="vf-range-multi" min="0" max="80" value="80" step="5">
+                    </div>
+                </div>
+                
                 <div class="vf-ctrl">
                     <label>Fuel Type</label>
                     <select id="filter-fuel" class="vf-select hover-target">
@@ -232,6 +254,7 @@
     <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="global-auth.js"></script>
     
@@ -278,6 +301,9 @@
                 // Filters
                 this.searchInput = document.getElementById('filter-search');
                 this.brandSelect = document.getElementById('filter-brand');
+                this.priceMin = document.getElementById('filter-price-min');
+                this.priceMax = document.getElementById('filter-price-max');
+                this.priceDisplay = document.getElementById('price-display');
                 this.fuelSelect = document.getElementById('filter-fuel');
                 this.transSelect = document.getElementById('filter-trans');
                 this.btnReset = document.getElementById('filter-reset');
@@ -287,9 +313,22 @@
 
             async init() {
                 try {
-                    const url = `${SUPABASE_URL}/rest/v1/cars?select=id,title,brand,price,price_display,year,kms_covered,fuel_type,transmission,location,image,link&limit=1000&order=price.desc`;
-                    const res = await fetch(url, { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } });
-                    this.allCars = await res.json();
+                    let allFetched = [];
+                    let offset = 0;
+                    const limit = 1000;
+                    const loaderText = this.loader.querySelector('div div:last-child');
+                    if(loaderText) loaderText.innerText = "Accessing Vault...";
+                    
+                    while (true) {
+                        const url = `${SUPABASE_URL}/rest/v1/cars?select=id,title,brand,price,price_display,year,kms_covered,fuel_type,transmission,location,image,link&tier=eq.standard&limit=${limit}&offset=${offset}&order=price.desc`;
+                        const res = await fetch(url, { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } });
+                        const chunk = await res.json();
+                        allFetched.push(...chunk);
+                        
+                        if (chunk.length < limit) break;
+                        offset += limit;
+                    }
+                    this.allCars = allFetched;
                     
                     this.populateFilterOptions();
                     this.applyFilters();
@@ -326,9 +365,27 @@
                 this.brandSelect.addEventListener('change', () => this.applyFilters());
                 this.fuelSelect.addEventListener('change', () => this.applyFilters());
                 this.transSelect.addEventListener('change', () => this.applyFilters());
+                
+                const updatePriceUI = () => {
+                    let min = parseInt(this.priceMin.value);
+                    let max = parseInt(this.priceMax.value);
+                    if(min > max) {
+                        if(this.lastActive === 'min') { min = max; this.priceMin.value = min; }
+                        else { max = min; this.priceMax.value = max; }
+                    }
+                    this.priceDisplay.innerText = `₹${min}L - ₹${max}L${max==80?'+':''}`;
+                    this.applyFilters();
+                };
+                
+                this.priceMin.addEventListener('input', () => { this.lastActive = 'min'; updatePriceUI(); });
+                this.priceMax.addEventListener('input', () => { this.lastActive = 'max'; updatePriceUI(); });
+
                 this.btnReset.addEventListener('click', () => {
                     this.searchInput.value = '';
                     this.brandSelect.value = 'ALL';
+                    this.priceMin.value = 0;
+                    this.priceMax.value = 80;
+                    this.priceDisplay.innerText = '₹0L - ₹80L+';
                     this.fuelSelect.value = 'ALL';
                     this.transSelect.value = 'ALL';
                     this.applyFilters();
@@ -342,11 +399,16 @@
             applyFilters() {
                 const searchTxt = this.searchInput.value.toLowerCase().trim();
                 const brandVal = this.brandSelect.value;
+                const pMin = parseInt(this.priceMin.value) * 100000;
+                const pMaxStr = parseInt(this.priceMax.value);
+                const pMax = pMaxStr * 100000;
                 const fuelVal = this.fuelSelect.value;
                 const transVal = this.transSelect.value;
 
                 this.filteredCars = this.allCars.filter(c => {
                     if (brandVal !== 'ALL' && c.brand !== brandVal) return false;
+                    if (c.price < pMin) return false;
+                    if (pMaxStr < 80 && c.price > pMax) return false;
                     if (fuelVal !== 'ALL' && c.fuel_type !== fuelVal) return false;
                     if (transVal !== 'ALL' && c.transmission !== transVal) return false;
                     
@@ -511,7 +573,19 @@
         }
 
         // ── AI & COMPARE ACTIONS ──
+        async function checkAuth() {
+            if (!window.supabase) return false;
+            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            const { data } = await sb.auth.getSession();
+            return data?.session?.user != null;
+        }
+
         async function evaluateAI(id, title, brand, year, price, kms, fuel, trans) {
+            if (!(await checkAuth())) {
+                alert("Please sign in to use the AI evaluation feature.");
+                window.location.href = "login.html";
+                return;
+            }
             let modal = document.getElementById('ai-modal');
             if(!modal) {
                 document.body.insertAdjacentHTML('beforeend', `
@@ -543,7 +617,12 @@
             }
         }
 
-        function addToCompare(id, title, brand, year, price, kms_covered, fuel_type, transmission, image, link) {
+        async function addToCompare(id, title, brand, year, price, kms_covered, fuel_type, transmission, image, link) {
+            if (!(await checkAuth())) {
+                alert("Please sign in to use the compare feature.");
+                window.location.href = "login.html";
+                return;
+            }
             let list = JSON.parse(localStorage.getItem('compareList') || '[]');
             if(list.find(c => c.id === id)) { alert('Already in comparison list.'); return; }
             if(list.length >= 3) { alert('You can only compare up to 3 cars at once.'); return; }
@@ -556,17 +635,18 @@
             let list = JSON.parse(localStorage.getItem('compareList') || '[]');
             let badge = document.getElementById('compare-badge');
             if(list.length > 0) {
+                const badgeText = list.length === 2 ? 'Move to Compare' : `Compare (${list.length})`;
                 if(!badge) {
                     document.body.insertAdjacentHTML('beforeend', `
                         <a href="compare.html" id="compare-badge" style="position:fixed; bottom:30px; right:30px; z-index:9000; background:var(--accent); color:#000; padding:15px 30px; border-radius:50px; font-family:var(--font-display); font-weight:700; text-decoration:none; box-shadow:0 10px 30px rgba(255,51,0,0.4); display:flex; align-items:center; gap:10px; transition:0.3s; transform:translateY(100px); opacity:0;">
-                            <span>Compare (<span id="compare-count">${list.length}</span>)</span>
+                            <span id="compare-count-text">${badgeText}</span>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </a>
                     `);
                     badge = document.getElementById('compare-badge');
                     setTimeout(() => { badge.style.transform = 'translateY(0)'; badge.style.opacity = '1'; }, 100);
                 } else {
-                    document.getElementById('compare-count').innerText = list.length;
+                    document.getElementById('compare-count-text').innerText = badgeText;
                 }
             } else if (badge) {
                 badge.style.transform = 'translateY(100px)'; badge.style.opacity = '0';
