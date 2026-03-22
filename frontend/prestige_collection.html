@@ -75,7 +75,7 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
 .ribbon-wrap { display: none !important; }
 
 /* Prestige Hero Overrides */
-.hero { position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.hero { position: relative; width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 #hero-video { position: absolute; top:0; left:0; width:100%; height:100%; z-index:0; object-fit: cover; opacity: 0.8; }
 #dark-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%); z-index:1; pointer-events: none; }
 .hero-content { position: relative; z-index: 2; text-align: center; }
@@ -131,11 +131,6 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
 </head>
 <body>
 
-    <div class="cursor" id="cursor"></div>
-    <div class="cursor-ring" id="cursorRing"></div>
-
-    
-
     <header class="hero">
         <video autoplay loop muted playsinline id="hero-video">
             <source src="background_vdo.mp4" type="video/mp4">
@@ -177,6 +172,7 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
     </section>
 
     <!-- Supabase credentials — SUPABASE_URL and SUPABASE_ANON defined here -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script>
         // SUPABASE_URL and SUPABASE_ANON are now available from config.js
@@ -327,6 +323,8 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
             shownCount.textContent  = rendered;
             totalCountEl.textContent = totalCount || rendered;
             countBadge.style.display = 'block';
+            
+            setTimeout(() => { bindDynamicHover(); }, 300);
         }
 
         // ─────────────────────────────────────────────────────────────────
@@ -394,37 +392,6 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
         // VIDEO BACKGROUND INITIALIZED
         // ─────────────────────────────────────────────────────────────────
 
-        // ─────────────────────────────────────────────────────────────────
-        // CURSOR
-        // ─────────────────────────────────────────────────────────────────
-        const cursorIcon = document.getElementById('cursor');
-        const ringIcon   = document.getElementById('cursorRing');
-        let mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my;
-
-        document.addEventListener('mousemove', e => {
-            mx = e.clientX; my = e.clientY;
-            cursorIcon.style.left = mx + 'px';
-            cursorIcon.style.top  = my + 'px';
-        });
-
-        (function animRing() {
-            rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-            ringIcon.style.left = rx + 'px'; ringIcon.style.top = ry + 'px';
-            requestAnimationFrame(animRing);
-        })();
-
-        document.addEventListener('mouseover', e => {
-            if (e.target.closest('a, button, .card-wrapper, .interactive')) {
-                cursorIcon.style.width  = '20px'; cursorIcon.style.height = '20px';
-                ringIcon.style.width    = '54px'; ringIcon.style.height   = '54px';
-            }
-        });
-        document.addEventListener('mouseout', e => {
-            if (e.target.closest('a, button, .card-wrapper, .interactive')) {
-                cursorIcon.style.width  = '10px'; cursorIcon.style.height = '10px';
-                ringIcon.style.width    = '36px'; ringIcon.style.height   = '36px';
-            }
-        });
     </script>
 
   <div id="cursor"></div>
@@ -442,8 +409,7 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
         window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
     }
     
-    // Add hover-target to cards dynamically
-    setInterval(() => {
+    function bindDynamicHover() {
        document.querySelectorAll('.car-card:not(.hover-bound), a:not(.hover-bound), button:not(.hover-bound), .flt:not(.hover-bound)').forEach(c => {
            c.classList.add('hover-bound', 'hover-target');
            c.addEventListener('mouseenter', () => document.body.classList.add('hover-active'));
@@ -453,7 +419,7 @@ body { padding-top: 80px; overflow-x: hidden; background: var(--dark, #0a0a0c); 
           c.classList.add('gsap-bound');
           gsap.fromTo(c, { x: -100, y: 50, opacity: 0, rotationY: -35, scale: 0.9 }, { x: 0, y: 0, opacity: 1, rotationY: 0, scale: 1, duration: 0.8, ease: "power4.out", scrollTrigger: { trigger: c, start: 'top bottom-=50', toggleActions: 'play none none none' } });
        });
-    }, 500);
+    }
   </script>
 
 </body>
