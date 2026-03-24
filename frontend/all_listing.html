@@ -133,6 +133,21 @@
         /* Full page loader */
         #page-loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0a0a0c; z-index: 9999; display: flex; align-items: center; justify-content: center; color: #ff3300; font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4em; transition: opacity 0.8s ease; }
         .loader-ring { width: 50px; height: 50px; border: 1.5px solid rgba(255,51,0,0.15); border-top-color: #ff3300; border-radius: 50%; margin-bottom: 25px; }
+
+        /* ── SAVE CAR HEART BUTTON ── */
+        .save-car-btn {
+            position: absolute; top: 15px; right: 15px; z-index: 20;
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; cursor: pointer; opacity: 0; 
+            transition: opacity 0.3s ease, transform 0.2s ease, background 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+        .cvis:hover .save-car-btn { opacity: 1; }
+        .save-car-btn:hover { background: rgba(255,51,0,0.8); transform: scale(1.1); }
+        .save-car-btn.saved { opacity: 1; color: #ff3300; background: rgba(0,0,0,0.7); border-color: #ff3300; }
+        .save-car-btn.saved svg { fill: #ff3300; stroke: #ff3300; }
     </style>
 </head>
 <body>
@@ -295,6 +310,7 @@
                 this.filteredCars = [];
                 this.pageSize = 30;
                 this.currentPage = 1;
+                this.savedCars = new Set();
                 
                 // DOM Elements
                 this.grid = document.getElementById('showroom-grid');
@@ -320,6 +336,17 @@
                 try {
                     let allFetched = [];
                     
+                    if (window.supabase) {
+                        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+                        const { data: { session } } = await sb.auth.getSession();
+                        if (session?.user) {
+                            const { data: savedData } = await sb.from('saved_cars').select('make, model, year, price').eq('user_id', session.user.id);
+                            if (savedData) {
+                                this.savedCars = new Set(savedData.map(s => `${s.make}-${s.model}-${s.year}-${s.price}`));
+                            }
+                        }
+                    }
+
                     const countUrl = `${SUPABASE_URL}/rest/v1/cars?select=id&tier=eq.standard`;
                     const countRes = await fetch(countUrl, { 
                         method: 'HEAD', 
@@ -475,10 +502,19 @@
                 const endIndex = Math.min(startIndex + this.pageSize, this.filteredCars.length);
                 const chunk = this.filteredCars.slice(startIndex, endIndex);
 
-                const htmlStr = chunk.map(c => `
+                const htmlStr = chunk.map(c => {
+                    const priceStr = c.price_display || c.price || '';
+                    const isSaved = this.savedCars && this.savedCars.has(`${c.brand}-${c.title}-${c.year || 0}-${priceStr}`);
+                    
+                    return `
                     <div class="car-card reveal-chunk">
                         <div class="cvis">
                             <img src="${c.image ? this.escape(c.image) : ''}" onerror="this.src='https://images.unsplash.com/photo-1544839304-c9a92207b0ec?q=80&w=800&auto=format&fit=crop';" alt="Car" loading="lazy">
+                            <button class="save-car-btn ${isSaved ? 'saved' : ''}" onclick="toggleSaveCar(event, this, '${this.escape(c.brand)}', '${this.escape(c.title)}', ${c.year || 0}, '${this.escape(priceStr)}', '${c.image ? this.escape(c.image) : ''}')" title="${isSaved ? 'Unsave Car' : 'Save Car'}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
                         </div>
                         <div class="cbody">
                             <div class="cname">${this.escape(c.title || 'Unknown Model')}</div>
@@ -499,12 +535,12 @@
                             
                             <div class="cacts-strip" style="flex-wrap: wrap;">
                                 <a href="${c.link ? this.escape(c.link) : '#'}" target="_blank" class="cas-btn cas-view hover-target">Inspect</a>
-                                <button onclick="evaluateAI('${c.id}', '${this.escape(c.title)}', '${this.escape(c.brand)}', ${c.year || 0}, ${c.price || 0}, ${c.kms_covered || 0}, '${this.escape(c.fuel_type)}', '${this.escape(c.transmission)}')" class="cas-btn hover-target">AI Evaluate</button>
                                 <button onclick="addToCompare('${c.id}', '${this.escape(c.title)}', '${this.escape(c.brand)}', ${c.year || 0}, ${c.price || 0}, ${c.kms_covered || 0}, '${this.escape(c.fuel_type)}', '${this.escape(c.transmission)}', '${c.image ? this.escape(c.image) : ''}', '${c.link ? this.escape(c.link) : '#'}')" class="cas-btn hover-target" style="flex:auto;">+ Compare</button>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 this.grid.insertAdjacentHTML('beforeend', htmlStr);
 
@@ -626,6 +662,67 @@
                 document.getElementById('ai-modal-content').innerHTML = data.choices[0].message.content.replace(/\n/g, '<br/>');
             } catch(e) {
                 document.getElementById('ai-modal-content').innerHTML = 'Error communicating with AI. Please try again.';
+            }
+        }
+
+        async function toggleSaveCar(event, btnElement, make, model, year, price, image_url) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            if (!(await checkAuth())) {
+                alert("Please sign in to save cars.");
+                window.location.href = "login.html";
+                return;
+            }
+            
+            if (btnElement.classList.contains('saving')) return;
+            const isSaved = btnElement.classList.contains('saved');
+            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            const { data: { session } } = await sb.auth.getSession();
+            
+            btnElement.classList.add('saving');
+            const originalHTML = btnElement.innerHTML;
+            btnElement.innerHTML = `<div class="loader-ring" style="width:20px;height:20px;border-width:2px;margin:0;"></div>`;
+            
+            try {
+                if (isSaved) {
+                    const { error } = await sb.from('saved_cars')
+                        .delete()
+                        .match({ user_id: session.user.id, make: make, model: model, year: year, price: price.toString() });
+                        
+                    if (error) throw error;
+                    
+                    btnElement.classList.remove('saved');
+                    if (window.showroom && window.showroom.savedCars) {
+                        window.showroom.savedCars.delete(`${make}-${model}-${year}-${price}`);
+                    }
+                    btnElement.title = "Save Car";
+                } else {
+                    const { error } = await sb.from('saved_cars').insert({
+                        user_id: session.user.id,
+                        make: make,
+                        model: model,
+                        year: year,
+                        price: price.toString(),
+                        image_url: image_url
+                    });
+                    
+                    if (error) throw error;
+                    
+                    btnElement.classList.add('saved');
+                    if (window.showroom && window.showroom.savedCars) {
+                        window.showroom.savedCars.add(`${make}-${model}-${year}-${price}`);
+                    }
+                    btnElement.title = "Unsave Car";
+                }
+                
+                btnElement.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+            } catch (err) {
+                console.error("Error toggling save car:", err);
+                alert("Failed to update saved car. Please try again.");
+                btnElement.innerHTML = originalHTML;
+            } finally {
+                btnElement.classList.remove('saving');
             }
         }
 
